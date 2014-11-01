@@ -1,0 +1,16 @@
+bin
+gen
+build-bod.properties
+local.properties
+etc/apk
+
+.DS_Store
+.gradle
+.idea
+build
+etc/proguard/*
+
+common/build
+handheld/build
+wearable/build
+

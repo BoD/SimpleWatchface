@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="timeSize_withAmPm">70</integer>
+    <integer name="timeSize_withoutAmPm">80</integer>
+</resources>
