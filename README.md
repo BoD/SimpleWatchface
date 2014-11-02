@@ -1,7 +1,7 @@
 SimpleWatchface
 ===============
 
-TODO
+A very simple Watchface for Android Wear (using the non public API).
 
 Licence
 -------
