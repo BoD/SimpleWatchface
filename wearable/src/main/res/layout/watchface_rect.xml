@@ -17,33 +17,49 @@
         android:textSize="32sp"
         tools:text="Wed. 23 Oct." />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <FrameLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-12dp"
-        android:gravity="bottom"
-        android:orientation="horizontal">
+        android:layout_marginTop="-16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtTime"
+                android:layout_width="0px" android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/textColor"
+                android:gravity="center_horizontal"
+                tools:text="13:37"
+                tools:textSize="68sp" />
+
+            <TextView
+                android:id="@+id/txtAmPm"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top"
+                android:layout_marginTop="19sp"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@color/textColor"
+                android:textSize="12sp"
+                tools:text="PM" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/txtTime"
+            android:id="@+id/txtSeconds"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
+            android:fontFamily="sans-serif"
             android:textColor="@color/textColor"
-            tools:text="13:37"
-            tools:textSize="68sp" />
+            android:text="42"
+            android:layout_gravity="bottom|right"
+            android:layout_marginBottom="24dp"
+            android:textSize="24sp" />
 
-        <TextView
-            android:id="@+id/txtAmPm"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top"
-            android:layout_marginTop="19sp"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/textColor"
-            android:textSize="12sp"
-            tools:text="PM" />
-
-
-    </LinearLayout>
+    </FrameLayout>
 </LinearLayout>

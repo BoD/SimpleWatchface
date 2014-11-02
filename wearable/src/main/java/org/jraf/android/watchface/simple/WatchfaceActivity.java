@@ -10,6 +10,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.wearable.view.WatchViewStub;
 import android.text.format.DateFormat;
 import android.widget.TextView;
@@ -18,13 +19,17 @@ public class WatchfaceActivity extends Activity {
     private TextView mTxtTime;
     private TextView mTxtDate;
     private TextView mTxtAmPm;
+    private TextView mTxtSeconds;
 
     private boolean mTimeTickReceiverRegistered;
     private java.text.DateFormat mTimeFormat;
     private java.text.DateFormat mDateFormat;
     private boolean mIs24HourFormat;
     private SimpleDateFormat mTimeAmPmFormat;
+    private SimpleDateFormat mTimeSecondsFormat;
 
+    private Handler mHandler = new Handler();
+    private boolean mPaused;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +43,7 @@ public class WatchfaceActivity extends Activity {
                 mTxtTime = (TextView) stub.findViewById(R.id.txtTime);
                 mTxtDate = (TextView) stub.findViewById(R.id.txtDate);
                 mTxtAmPm = (TextView) stub.findViewById(R.id.txtAmPm);
+                mTxtSeconds = (TextView) stub.findViewById(R.id.txtSeconds);
 
                 if (mIs24HourFormat) {
                     mTxtTime.setTextSize(getResources().getInteger(R.integer.timeSize_withoutAmPm));
@@ -47,11 +53,52 @@ public class WatchfaceActivity extends Activity {
 
 //                Typeface typeface = Typeface.createFromAsset(getAssets(), "fonts/Arista2.0 light.ttf");
 //                mTxtTime.setTypeface(typeface);
+
+                mTxtTime.setPivotX(0);
+                mTxtTime.setPivotY(0);
+
                 updateDisplay();
 
                 registerTimeTick();
+
+                mTxtTime.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        showSeconds();
+                    }
+                });
             }
         });
+    }
+
+    private void showSeconds() {
+        mTxtTime.animate().scaleX(.9f).scaleY(.9f).setStartDelay(0);
+        mTxtSeconds.animate().alpha(1).setStartDelay(250);
+    }
+
+    private void hideSeconds() {
+        mTxtTime.animate().scaleX(1).scaleY(1).setStartDelay(250);
+        mTxtSeconds.animate().alpha(0).setStartDelay(0);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mTxtTime != null) {
+            showSeconds();
+            mHandler.post(mUpdateDisplayRunnable);
+        }
+        mPaused = false;
+    }
+
+    @Override
+    protected void onPause() {
+        if (mTxtTime != null) {
+            hideSeconds();
+        }
+        mPaused = true;
+        mHandler.removeCallbacks(mUpdateDisplayRunnable);
+        super.onPause();
     }
 
     private void registerTimeTick() {
@@ -69,8 +116,19 @@ public class WatchfaceActivity extends Activity {
     private void updateDisplay() {
         mTxtTime.setText(getFormattedTime());
         mTxtDate.setText(getFormattedDate());
-        mTxtAmPm.setText(getAmPm());
+        mTxtAmPm.setText(getFormattedAmPm());
+        mTxtSeconds.setText(getFormattedSeconds());
     }
+
+    private Runnable mUpdateDisplayRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (mTxtTime != null) {
+                updateDisplay();
+            }
+            if (!mPaused) mHandler.postDelayed(mUpdateDisplayRunnable, 1000);
+        }
+    };
 
     private CharSequence getFormattedTime() {
         if (mTimeFormat == null) {
@@ -87,6 +145,14 @@ public class WatchfaceActivity extends Activity {
         return formatted;
     }
 
+    private CharSequence getFormattedSeconds() {
+        if (mTimeSecondsFormat == null) {
+            mTimeSecondsFormat = new SimpleDateFormat("ss");
+        }
+        String formatted = mTimeSecondsFormat.format(new Date());
+        return formatted;
+    }
+
     private CharSequence getFormattedDate() {
         if (mDateFormat == null) {
             mDateFormat = new SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "dEEEMMM"));
@@ -94,7 +160,7 @@ public class WatchfaceActivity extends Activity {
         return mDateFormat.format(new Date());
     }
 
-    private String getAmPm() {
+    private String getFormattedAmPm() {
         if (mIs24HourFormat) return null;
         if (mTimeAmPmFormat == null) {
             mTimeAmPmFormat = new SimpleDateFormat("a");
