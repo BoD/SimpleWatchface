@@ -111,8 +111,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
             mBackgroundPaint.setStrokeWidth(1);
 
-            mHourMinutesPaint = new Paint();
-            mHourMinutesPaint.setTypeface(Typeface.SANS_SERIF);
+            mHourMinutesPaint = new Paint(); mHourMinutesPaint.setTypeface(Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD));
             mHourMinutesPaint.setTextSize(90);
 
             mSecondsPaint = new Paint();
@@ -283,18 +282,14 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             // Hour / minutes
             String hourMinutesStr = getHourMinutes(date);
             Rect hourMinutesBounds = new Rect();
-            mHourMinutesPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-            int hourMinutesWidth = hourMinutesBounds.width();
+            mHourMinutesPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds); int hourMinutesWidth = hourMinutesBounds.right;
             int hourMinutesHeight = hourMinutesBounds.height();
-            int hourMinutesAdjustLeft = hourMinutesBounds.left;
 
             if (!isInAmbientMode()) {
                 // Seconds
-                String secondsStr = "       " + getSeconds(date);
+                String secondsStr = " " + getSeconds(date);
                 Rect secondsBounds = new Rect();
-                mSecondsPaint.getTextBounds(secondsStr, 0, secondsStr.length(), secondsBounds);
-                int secondsWidth = secondsBounds.width();
-                int secondsAdjustLeft = secondsBounds.left;
+                mSecondsPaint.getTextBounds(secondsStr, 0, secondsStr.length(), secondsBounds); int secondsWidth = secondsBounds.right;
 
                 int totalWidth = hourMinutesWidth + secondsWidth;
                 int x = (width - totalWidth) / 2;
@@ -303,8 +298,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 p.setColor(Color.RED);
                 canvas.drawRect(x, 0, x + totalWidth, hourMinutesHeight, p);
 
-                canvas.drawText(hourMinutesStr, x- hourMinutesAdjustLeft , hourMinutesHeight, mHourMinutesPaint);
-                canvas.drawText(secondsStr, x + hourMinutesWidth  - secondsAdjustLeft, hourMinutesHeight, mSecondsPaint);
+                canvas.drawText(hourMinutesStr, x, hourMinutesHeight, mHourMinutesPaint);
+                canvas.drawText(secondsStr, x + hourMinutesWidth, hourMinutesHeight, mSecondsPaint);
             } else {
 
                 int x = (width - hourMinutesWidth) / 2;
@@ -313,7 +308,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 p.setColor(Color.RED);
                 canvas.drawRect(x, 0, x + hourMinutesWidth, hourMinutesHeight, p);
 
-                canvas.drawText(hourMinutesStr, x - hourMinutesAdjustLeft, hourMinutesHeight, mHourMinutesPaint);
+                canvas.drawText(hourMinutesStr, x, hourMinutesHeight, mHourMinutesPaint);
             }
 
         }
