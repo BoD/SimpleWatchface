@@ -25,7 +25,6 @@
 package org.jraf.android.simplewatchface.wear.app.watchface;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -40,6 +39,7 @@ import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
+import org.jraf.android.simplewatchface.R;
 import org.jraf.android.util.log.wrapper.Log;
 
 import java.text.SimpleDateFormat;
@@ -72,6 +72,11 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private static final float SECONDS_SIZE_FACTOR = .33f;
 
         /**
+         * How small the am/pm indicator is compared to hour / minutes.
+         */
+        private static final float AM_PM_SIZE_FACTOR = .27f;
+
+        /**
          * Number of pixels between hour / minutes and seconds.
          */
         private static final float SECONDS_SPACE = 2f;
@@ -85,10 +90,16 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private boolean mIsRound;
         private int mChinSize;
 
+        private int mColorBackgroundNormal;
+        private int mColorBackgroundAmbient;
+        private int mColorDateNormal;
+        private int mColorDateAmbient;
+
         private Paint mBackgroundPaint;
         private Paint mHourMinutesAmbientPaint;
         private Paint mHourMinutesNormalPaint;
         private Paint mSecondsPaint;
+        private Paint mAmPmPaint;
         private Paint mDatePaint;
 
         private Time mTime = new Time();
@@ -144,6 +155,15 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             Typeface timeTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-ExtraBoldItalic.ttf");
             Typeface dateTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-Italic.ttf");
 
+            // Colors
+            mColorBackgroundNormal = getResources().getColor(R.color.background_normal);
+            mColorBackgroundAmbient = getResources().getColor(R.color.background_ambient);
+            int colorTimeNormal = getResources().getColor(R.color.time_normal);
+            int colorTimeAmbient = getResources().getColor(R.color.time_ambient);
+            mColorDateNormal = getResources().getColor(R.color.date_normal);
+            mColorDateAmbient = getResources().getColor(R.color.date_ambient);
+            int colorAmPmNormal = getResources().getColor(R.color.amPm_normal);
+
             // Paints
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -152,14 +172,22 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mHourMinutesAmbientPaint = new Paint();
             mHourMinutesAmbientPaint.setTypeface(timeTypeface);
             mHourMinutesAmbientPaint.setTextSize(150);
+            mHourMinutesAmbientPaint.setColor(colorTimeAmbient);
 
             mHourMinutesNormalPaint = new Paint();
             mHourMinutesNormalPaint.setTypeface(timeTypeface);
             mHourMinutesNormalPaint.setTextSize(140);
+            mHourMinutesNormalPaint.setColor(colorTimeNormal);
 
             mSecondsPaint = new Paint();
             mSecondsPaint.setTypeface(timeTypeface);
             mSecondsPaint.setTextSize(140 * SECONDS_SIZE_FACTOR);
+            mSecondsPaint.setColor(colorTimeNormal);
+
+            mAmPmPaint = new Paint();
+            mAmPmPaint.setTypeface(timeTypeface);
+            mAmPmPaint.setTextSize(140 * AM_PM_SIZE_FACTOR);
+            mAmPmPaint.setColor(colorAmPmNormal);
 
             mDatePaint = new Paint();
             mDatePaint.setTypeface(dateTypeface);
@@ -173,17 +201,13 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private void updatePaints() {
             boolean ambientMode = isInAmbientMode();
             if (ambientMode) {
-                mBackgroundPaint.setColor(Color.BLACK);
-                mHourMinutesAmbientPaint.setColor(Color.WHITE);
-                mHourMinutesNormalPaint.setColor(Color.WHITE);
-                mSecondsPaint.setColor(Color.WHITE);
-                mDatePaint.setColor(Color.WHITE);
+                // Ambient mode: we maximize contrast
+                mBackgroundPaint.setColor(mColorBackgroundAmbient);
+                mDatePaint.setColor(mColorDateAmbient);
             } else {
-                mBackgroundPaint.setColor(Color.BLACK);
-                mHourMinutesAmbientPaint.setColor(Color.WHITE);
-                mHourMinutesNormalPaint.setColor(Color.WHITE);
-                mSecondsPaint.setColor(Color.WHITE);
-                mDatePaint.setColor(Color.WHITE);
+                // Normal mode: colors!
+                mBackgroundPaint.setColor(mColorBackgroundNormal);
+                mDatePaint.setColor(mColorDateNormal);
             }
 
             // Disable antialias for ambient mode + low bit
@@ -191,6 +215,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 mHourMinutesAmbientPaint.setAntiAlias(!ambientMode);
                 mHourMinutesNormalPaint.setAntiAlias(!ambientMode);
                 mSecondsPaint.setAntiAlias(!ambientMode);
+                mAmPmPaint.setAntiAlias(!ambientMode);
                 mDatePaint.setAntiAlias(!ambientMode);
             }
         }
@@ -291,7 +316,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             return res.toString();
         }
 
-        private String getFormattedAmPm() {
+        private String getAmPm() {
             if (mTime.hour <= 11) return "AM";
             return "PM";
         }
@@ -344,7 +369,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 int x = (canvasWidth - hourMinutesWidth) / 2 - hourMinutesBounds.left;
                 canvas.drawText(hourMinutesStr, x, hourMinutesHeight, mHourMinutesAmbientPaint);
             } else {
-                // 'Normal' mode: show seconds
+                // 'Normal' mode: show seconds (and AM/PM)
                 adjustTextSizeForHourMinutesSeconds(hourMinutesStr, canvasWidth);
 
                 // Hour / minutes
@@ -364,6 +389,12 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
                 canvas.drawText(hourMinutesStr, x, hourMinutesHeight, mHourMinutesNormalPaint);
                 canvas.drawText(secondsStr, x + hourMinutesWidth + SECONDS_SPACE - secondsBounds.left, hourMinutesHeight, mSecondsPaint);
+
+                // AM/PM
+                if (!mIs24HourFormat) {
+                    String amPm = getAmPm();
+                    canvas.drawText(amPm, x + hourMinutesWidth + SECONDS_SPACE - secondsBounds.left, secondsBounds.height(), mAmPmPaint);
+                }
             }
 
             // Date
@@ -451,6 +482,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                         mSecondsPaint.setTextSize(mHourMinutesNormalPaint.getTextSize() * SECONDS_SIZE_FACTOR);
                     } while (measureHourMinutesSeconds(hourMinutesStr) > canvasWidth);
                 }
+                mAmPmPaint.setTextSize(mHourMinutesNormalPaint.getTextSize() * AM_PM_SIZE_FACTOR);
 
                 // Update the cache
                 mCachedSizesForHourMinutesNormal.put(hourMinutesStr, (int) mHourMinutesNormalPaint.getTextSize());
@@ -458,6 +490,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 // Cache hit: use the value
                 mHourMinutesNormalPaint.setTextSize(fitSize);
                 mSecondsPaint.setTextSize(fitSize * SECONDS_SIZE_FACTOR);
+                mAmPmPaint.setTextSize(fitSize * AM_PM_SIZE_FACTOR);
             }
         }
 
