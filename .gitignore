@@ -1,6 +1,7 @@
 bin
 gen
 build.properties
+build.number
 local.properties
 etc/apk
 
