@@ -1,6 +1,6 @@
 bin
 gen
-build-bod.properties
+build.properties
 local.properties
 etc/apk
 
@@ -16,4 +16,3 @@ wearable/build
 /.idea/workspace.xml
 /.idea/libraries
 *.iml
-

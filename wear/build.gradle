@@ -9,13 +9,29 @@ android {
         applicationId "org.jraf.android.simplewatchface"
         minSdkVersion 21
         targetSdkVersion 21
-        versionCode 1
-        versionName "1.0"
+        versionCode buildNumber
+        versionName buildProperties['versionName']
+        resConfigs "en", "fr"
+
+        // For now we enable strict mode for all the configs
+        buildConfigField 'boolean', 'STRICT_MODE', 'true'
     }
+
+    signingConfigs {
+        release {
+            storeFile file(buildProperties['key-store'])
+            storePassword buildProperties['key-store-password']
+            keyAlias buildProperties['key-alias']
+            keyPassword buildProperties['key-alias-password']
+        }
+    }
+
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
+            shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
     }
 }

@@ -514,7 +514,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                     } while ((measure = (int) mDatePaint.measureText(dateStr)) < canvasWidth);
                     if (measure > canvasWidth) {
                         // We went too far
-                        mHourMinutesAmbientPaint.setTextSize(mDatePaint.getTextSize() - step);
+                        mDatePaint.setTextSize(mDatePaint.getTextSize() - step);
                     }
                 } else {
                     // Too big: try smaller
