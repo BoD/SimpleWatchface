@@ -79,12 +79,12 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         /**
          * Number of pixels between hour / minutes and seconds.
          */
-        private static final float SECONDS_SPACE = 2f;
+        private static final int SECONDS_SPACE = 2;
 
         /**
          * Number of pixels between time and date.
          */
-        private static final float DATE_SPACE = 8f;
+        private static final int DATE_SPACE = 8;
 
         private boolean mLowBitAmbient;
         private boolean mIsRound;
@@ -210,14 +210,13 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 mDatePaint.setColor(mColorDateNormal);
             }
 
-            // Disable antialias for ambient mode + low bit
-            if (mLowBitAmbient) {
-                mHourMinutesAmbientPaint.setAntiAlias(!ambientMode);
-                mHourMinutesNormalPaint.setAntiAlias(!ambientMode);
-                mSecondsPaint.setAntiAlias(!ambientMode);
-                mAmPmPaint.setAntiAlias(!ambientMode);
-                mDatePaint.setAntiAlias(!ambientMode);
-            }
+            // Enable antialias for normal mode / disable it for ambient mode + low bit
+            boolean antialias = !ambientMode || mLowBitAmbient;
+            mHourMinutesAmbientPaint.setAntiAlias(antialias);
+            mHourMinutesNormalPaint.setAntiAlias(antialias);
+            mSecondsPaint.setAntiAlias(antialias);
+            mAmPmPaint.setAntiAlias(antialias);
+            mDatePaint.setAntiAlias(antialias);
         }
 
         @Override
@@ -345,68 +344,88 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             Log.d();
+
+            mTime.setToNow();
+
             int canvasWidth = bounds.width();
             int canvasHeight = bounds.height();
-            int peekCardTop = getPeekCardPosition().top;
 
             // Background
             canvas.drawRect(0, 0, canvasWidth - 1, canvasHeight - 1, mBackgroundPaint);
 
-            mTime.setToNow();
-
-            // Hour / minutes
+            // Measure hour / minutes (/ seconds)
+            Rect hourMinutesBounds = new Rect();
+            Rect secondsBounds = new Rect();
             String hourMinutesStr = getHourMinutes();
-
-            int hourMinutesHeight;
             if (isInAmbientMode()) {
                 // Ambient mode: don't show seconds
                 adjustTextSizeForHourMinutes(hourMinutesStr, canvasWidth);
-                Rect hourMinutesBounds = new Rect();
                 mHourMinutesAmbientPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-                int hourMinutesWidth = hourMinutesBounds.right;
-                hourMinutesHeight = hourMinutesBounds.height();
-
-                int x = (canvasWidth - hourMinutesWidth) / 2 - hourMinutesBounds.left;
-                canvas.drawText(hourMinutesStr, x, hourMinutesHeight, mHourMinutesAmbientPaint);
             } else {
                 // 'Normal' mode: show seconds (and AM/PM)
                 adjustTextSizeForHourMinutesSeconds(hourMinutesStr, canvasWidth);
 
                 // Hour / minutes
-                Rect hourMinutesBounds = new Rect();
                 mHourMinutesNormalPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-                int hourMinutesWidth = hourMinutesBounds.right;
-                hourMinutesHeight = hourMinutesBounds.height();
 
                 // Seconds
-                String secondsStr = getSeconds();
-                Rect secondsBounds = new Rect();
                 mSecondsPaint.getTextBounds(WIDEST_SECONDS, 0, WIDEST_SECONDS.length(), secondsBounds);
-                int secondsWidth = secondsBounds.right;
-
-                int totalWidth = hourMinutesWidth + secondsWidth;
-                int x = (canvasWidth - totalWidth) / 2 - hourMinutesBounds.left;
-
-                canvas.drawText(hourMinutesStr, x, hourMinutesHeight, mHourMinutesNormalPaint);
-                canvas.drawText(secondsStr, x + hourMinutesWidth + SECONDS_SPACE - secondsBounds.left, hourMinutesHeight, mSecondsPaint);
-
-                // AM/PM
-                if (!mIs24HourFormat) {
-                    String amPm = getAmPm();
-                    canvas.drawText(amPm, x + hourMinutesWidth + SECONDS_SPACE - secondsBounds.left, secondsBounds.height(), mAmPmPaint);
-                }
             }
 
-            // Date
+            // Measure date
+            Rect dateBounds = new Rect();
             String dateStr = getDate();
             adjustTextSizeForDate(dateStr, canvasWidth);
-            Rect dateBounds = new Rect();
             mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
             int dateWidth = dateBounds.right;
             int dateHeight = dateBounds.height();
 
-            int x = (canvasWidth - dateWidth) / 2 - dateBounds.left;
-            canvas.drawText(dateStr, x, hourMinutesHeight + dateHeight + DATE_SPACE, mDatePaint);
+            int hourMinutesWidth = hourMinutesBounds.right;
+            int hourMinutesHeight = hourMinutesBounds.height();
+
+            // Draw hour / minutes (/ seconds)
+            int totalHeight = hourMinutesHeight + DATE_SPACE + dateHeight;
+            Rect peekCardPosition = getPeekCardPosition();
+            int top;
+            if (peekCardPosition.height() == 0) {
+                // No peek card
+                top = (canvasHeight - totalHeight) / 2;
+            } else {
+                int peekCardTop = peekCardPosition.top;
+                top = (peekCardTop - totalHeight) / 2;
+            }
+            if (isInAmbientMode()) {
+                // Ambient mode: don't show seconds
+                int hourMinutesX = (canvasWidth - hourMinutesWidth) / 2 - hourMinutesBounds.left;
+                int hourMinutesY = top + hourMinutesHeight;
+                canvas.drawText(hourMinutesStr, hourMinutesX, hourMinutesY, mHourMinutesAmbientPaint);
+            } else {
+                // 'Normal' mode: show seconds (and AM/PM)
+                int secondsWidth = secondsBounds.right;
+                int totalWidth = hourMinutesWidth + secondsWidth;
+                int hourMinutesX = (canvasWidth - totalWidth) / 2 - hourMinutesBounds.left;
+                int hourMinutesY = top + hourMinutesHeight;
+
+                // Hour / minutes
+                canvas.drawText(hourMinutesStr, hourMinutesX, hourMinutesY, mHourMinutesNormalPaint);
+
+                // Seconds
+                String secondsStr = getSeconds();
+                int secondsX = hourMinutesX + hourMinutesWidth + SECONDS_SPACE - secondsBounds.left;
+                canvas.drawText(secondsStr, secondsX, hourMinutesY, mSecondsPaint);
+
+                // AM/PM
+                if (!mIs24HourFormat) {
+                    String amPm = getAmPm();
+                    int amPmY = top + secondsBounds.height();
+                    canvas.drawText(amPm, secondsX, amPmY, mAmPmPaint);
+                }
+            }
+
+            // Draw date
+            int dateX = (canvasWidth - dateWidth) / 2 - dateBounds.left;
+            int dateY = top + hourMinutesHeight + DATE_SPACE + dateHeight;
+            canvas.drawText(dateStr, dateX, dateY, mDatePaint);
         }
 
         //endregion
