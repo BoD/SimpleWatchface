@@ -34,6 +34,6 @@ public class Application extends android.app.Application {
 
         // Log
         Log.init(Constants.TAG);
-        Log.setEnabled(false);
+        Log.setEnabled(true);
     }
 }
