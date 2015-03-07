@@ -44,6 +44,7 @@ import org.jraf.android.util.log.wrapper.Log;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class SimpleWatchFaceService extends CanvasWatchFaceService {
@@ -86,6 +87,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private static final int DATE_SPACE = 8;
 
         private boolean mLowBitAmbient;
+        private boolean mBurnInProtection;
         private boolean mIsRound;
         private int mChinSize;
 
@@ -107,6 +109,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
         private int mCachedDateDay;
         private String mCachedDateStr;
+
+        private HashMap<String, Integer> mDateSizeCache = new HashMap<>(4);
 
         /**
          * Handler to update the time periodically in interactive mode.
@@ -215,13 +219,25 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mSecondsPaint.setAntiAlias(antialias);
             mAmPmPaint.setAntiAlias(antialias);
             mDatePaint.setAntiAlias(antialias);
+
+            // Set an outline for ambient + burn in protection / disable it otherwise
+            boolean outline = ambientMode && mBurnInProtection;
+            Paint.Style style;
+            if (outline) {
+                style = Paint.Style.STROKE;
+            } else {
+                style = Paint.Style.FILL;
+            }
+            mHourMinutesAmbientPaint.setStyle(style);
+            mDatePaint.setStyle(style);
         }
 
         @Override
         public void onPropertiesChanged(Bundle properties) {
             super.onPropertiesChanged(properties);
             mLowBitAmbient = properties.getBoolean(PROPERTY_LOW_BIT_AMBIENT, false);
-            Log.d("mLowBitAmbient=" + mLowBitAmbient);
+            mBurnInProtection = properties.getBoolean(PROPERTY_BURN_IN_PROTECTION, false);
+            Log.d("mLowBitAmbient=" + mLowBitAmbient + " mBurnInProtection" + mBurnInProtection);
         }
 
         @Override
@@ -589,6 +605,20 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         // region
 
         private void adjustTextSizeForDate(String dateStr, int wantedWidth) {
+            mDatePaint.setTextSize(getFitTextSizeForDate(dateStr, wantedWidth));
+        }
+
+        private int getFitTextSizeForDate(String dateStr, int wantedWidth) {
+            String key = wantedWidth + dateStr;
+            Integer res = mDateSizeCache.get(key);
+            if (res == null) {
+                res = computeFitTextSizeForDate(dateStr, wantedWidth);
+                mDateSizeCache.put(key, res);
+            }
+            return res;
+        }
+
+        private int computeFitTextSizeForDate(String dateStr, int wantedWidth) {
             int step = 4;
             int measure = (int) mDatePaint.measureText(dateStr);
             if (measure == wantedWidth) {
@@ -608,6 +638,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                     mDatePaint.setTextSize(mDatePaint.getTextSize() - step);
                 } while (mDatePaint.measureText(dateStr) > wantedWidth);
             }
+            return (int) mDatePaint.getTextSize();
         }
 
         private void adjustSecondsAndAmPmSizes() {
