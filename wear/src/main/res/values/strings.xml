@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">Simple Watch Face</string>
+    <string name="settings_colors_hourMinutes">Hours and minutes</string>
+    <string name="settings_colors_seconds">Seconds</string>
+    <string name="settings_colors_amPm">AM/PM</string>
+    <string name="settings_colors_date">Date</string>
+
 </resources>

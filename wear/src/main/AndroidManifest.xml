@@ -1,5 +1,7 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.jraf.android.simplewatchface">
+<?xml version="1.0" encoding="utf-8"?>
+<manifest
+    package="org.jraf.android.simplewatchface"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-feature android:name="android.hardware.type.watch" />
 
@@ -7,18 +9,20 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
-        android:allowBackup="true"
-        android:label="@string/app_name"
         android:name=".wear.app.Application"
+        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
         android:theme="@android:style/Theme.DeviceDefault">
+
+        <!-- Watch face service -->
 
         <service
             android:name=".wear.app.watchface.SimpleWatchFaceService"
-            android:label="@string/app_name"
             android:allowEmbedded="true"
-            android:taskAffinity=""
-            android:permission="android.permission.BIND_WALLPAPER">
+            android:label="@string/app_name"
+            android:permission="android.permission.BIND_WALLPAPER"
+            android:taskAffinity="">
             <meta-data
                 android:name="android.service.wallpaper"
                 android:resource="@xml/watch_face" />
@@ -29,12 +33,39 @@
                 android:name="com.google.android.wearable.watchface.preview_circular"
                 android:resource="@drawable/watch_face_preview_circular" />
 
+            <!-- Wearable configuration activity -->
+            <meta-data
+                android:name="com.google.android.wearable.watchface.wearableConfigurationAction"
+                android:value="org.jraf.android.simplewatchface.ACTION_SETTINGS" />
+
             <intent-filter>
                 <action android:name="android.service.wallpaper.WallpaperService" />
+
                 <category android:name="com.google.android.wearable.watchface.category.WATCH_FACE" />
             </intent-filter>
         </service>
 
+        <!-- Settings -->
+
+        <activity
+            android:name=".wear.app.settings.SettingsActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="org.jraf.android.simplewatchface.ACTION_SETTINGS" />
+
+                <category android:name="com.google.android.wearable.watchface.category.WEARABLE_CONFIGURATION" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <!-- Color pick -->
+
+        <activity android:name=".wear.app.settings.colorpick.ColorPickActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
