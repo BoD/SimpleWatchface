@@ -29,6 +29,7 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import org.jraf.android.simplewatchface.R;
+import org.jraf.android.simplewatchface.wear.view.ColorPickView;
 
 public class ColorPickActivity extends Activity {
     private TextView mTextView;
@@ -37,5 +38,7 @@ public class ColorPickActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.color_pick);
+        ColorPickView colorPickView = (ColorPickView) findViewById(R.id.colorPick);
+        colorPickView.setOldColor(0xFFe8e8e8);
     }
 }

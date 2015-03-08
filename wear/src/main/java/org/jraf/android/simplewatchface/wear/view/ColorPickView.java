@@ -141,7 +141,7 @@ public class ColorPickView extends View {
         super.onDraw(canvas);
         canvas.translate(mTranslationOffset, mTranslationOffset);
 
-        int color = calculateColor(mColorAngleRad);
+        int color = angleToColor(mColorAngleRad);
 
         // Color wheel
         canvas.drawOval(mColorWheelRect, mColorWheelPaint);
@@ -304,7 +304,7 @@ public class ColorPickView extends View {
      * @param angle The selected color's position expressed as angle (in rad).
      * @return The ARGB value of the color on the color wheel at the specified angle.
      */
-    private int calculateColor(float angle) {
+    private int angleToColor(float angle) {
         // This is the "scale" between 0 and 1 (in other words, a number of turns of the circle)
         float scale = (float) (angle / (2 * Math.PI));
         if (scale < 0) scale += 1;
@@ -358,5 +358,40 @@ public class ColorPickView extends View {
 
         outHsv[1] = (2 * s) / (l + s);
         outHsv[2] = (l + s) / 2;
+    }
+
+    /**
+     * Convert an HSV color to HSL.<br/>
+     * Source:
+     * - http://en.wikipedia.org/wiki/HSL_and_HSV and
+     * - http://ariya.blogspot.com.ar/2008/07/converting-between-hsl-and-hsv.html
+     *
+     * @param inHsv  HSv color to convert.
+     * @param outHsl converted HSL color.
+     */
+    private static void hsvToHsl(float[] inHsv, float[] outHsl) {
+        outHsl[0] = inHsv[0];
+
+        float l = (2 - inHsv[1]) * inHsv[2];
+        float s = inHsv[1] * inHsv[2];
+        if (l <= 1) {
+            s /= l;
+        } else {
+            s /= 2 - l;
+        }
+
+        outHsl[1] = s;
+        outHsl[2] = l / 2;
+    }
+
+    public void setOldColor(int oldColor) {
+        float[] hsv = new float[3];
+        float[] hsl = new float[3];
+        Color.colorToHSV(oldColor, hsv);
+        hsvToHsl(hsv, hsl);
+        mColorAngleRad = (float) Math.toRadians(-hsl[0]);
+        mSaturationAngleRad = (float) (2 * Math.PI * (1 - hsl[1]) / 2);
+        mLightAngleRad = (float) (2 * Math.PI * (.5 + hsl[2] / 2));
+        invalidate();
     }
 }
