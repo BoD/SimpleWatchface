@@ -36,7 +36,6 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.jraf.android.simplewatchface.R;
-import org.jraf.android.util.log.wrapper.Log;
 
 public class ColorPickView extends View {
     private static final int[] COLORS = new int[] {0xFFFF0000, 0xFFFF00FF, 0xFF0000FF, 0xFF00FFFF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000};
@@ -47,26 +46,30 @@ public class ColorPickView extends View {
     private Paint mColorWheelPaint;
     private RectF mColorWheelRect = new RectF();
     private float mColorWheelRadius;
-    private float mColorAngle;
+    private float mColorAngleRad;
 
     // Saturation arc
     private Paint mSaturationArcPaint;
     private int[] mSaturationColors = new int[2];
-    private float mSaturationAngle;
+    private float mSaturationAngleRad;
     private RectF mSaturationLightRect = new RectF();
     private float mSaturationLightWheelRadius;
 
     // Light arc
     private Paint mLightArcPaint;
     private int[] mLightColors = new int[3];
-    private float mLightAngle;
+    private float mLightAngleRad;
 
     // Ok half circle
     private Paint mOkHalfCirclePaint;
     private RectF mOkCancelRectangle = new RectF();
     private float mOkCancelRadius;
 
+    // Cancel half circle
     private Paint mCancelHalfCirclePaint;
+
+    // Indicator / separator
+    private Paint mIndicatorPaint;
 
     private float mStrokeWidth;
     private int mSpacerPx;
@@ -125,6 +128,11 @@ public class ColorPickView extends View {
         // OK
         mOkHalfCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mOkHalfCirclePaint.setStyle(Paint.Style.FILL);
+
+        // Indicator / separator
+        mIndicatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mIndicatorPaint.setStyle(Paint.Style.STROKE);
+        mIndicatorPaint.setStrokeWidth(mSpacerPx);
     }
 
 
@@ -133,7 +141,7 @@ public class ColorPickView extends View {
         super.onDraw(canvas);
         canvas.translate(mTranslationOffset, mTranslationOffset);
 
-        int color = calculateColor(mColorAngle);
+        int color = calculateColor(mColorAngleRad);
 
         // Color wheel
         canvas.drawOval(mColorWheelRect, mColorWheelPaint);
@@ -151,18 +159,17 @@ public class ColorPickView extends View {
         canvas.drawArc(mSaturationLightRect, 180, 180, false, mLightArcPaint);
 
         // OK half circle
-        float hue = (float) (mColorAngle * 180f / Math.PI); // rad to deg
+        float hue = (float) Math.toDegrees(mColorAngleRad); // rad to deg
         if (hue < 0) hue = hue + 360;
         hue = 360 - hue; // invert
         mHsl[0] = hue;
-        Log.d("h=" + mHsl[0]);
 
-        double saturationTurn = mSaturationAngle / (2 * Math.PI); // rad to turn
+        double saturationTurn = mSaturationAngleRad / (2 * Math.PI); // rad to turn
         saturationTurn = saturationTurn * 2; // circle to half circle
         saturationTurn = 1 - saturationTurn; // invert direction
         mHsl[1] = (float) saturationTurn;
 
-        double lightTurn = mLightAngle / (2 * Math.PI); // rad to turn
+        double lightTurn = mLightAngleRad / (2 * Math.PI); // rad to turn
         if (lightTurn < 0) lightTurn += 1;
         lightTurn = (lightTurn - .5) * 2; // circle to half circle
         mHsl[2] = (float) lightTurn;
@@ -172,6 +179,32 @@ public class ColorPickView extends View {
 
         canvas.drawArc(mOkCancelRectangle, 180, 180, false, mOkHalfCirclePaint);
 
+        // Separator
+        mIndicatorPaint.setColor(0xFF000000); // black
+        canvas.drawLine(-mTranslationOffset + mStrokeWidth, 0, mTranslationOffset - mStrokeWidth, 0, mIndicatorPaint);
+
+        // Color indicator
+        int invertColor = Color.rgb(255 - Color.red(color), 255 - Color.green(color), 255 - Color.blue(color));
+        mIndicatorPaint.setColor(invertColor);
+        double cos = Math.cos(mColorAngleRad);
+        double sin = Math.sin(mColorAngleRad);
+        int startX = (int) ((mTranslationOffset - mStrokeWidth / 2) * cos);
+        int startY = (int) ((mTranslationOffset - mStrokeWidth / 2) * sin);
+        canvas.drawCircle(startX, startY, mStrokeWidth / 3, mIndicatorPaint);
+
+        // Saturation indicator
+        cos = Math.cos(mSaturationAngleRad);
+        sin = Math.sin(mSaturationAngleRad);
+        startX = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * cos);
+        startY = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * sin);
+        canvas.drawCircle(startX, startY, mStrokeWidth / 3, mIndicatorPaint);
+
+        // Light indicator
+        cos = Math.cos(mLightAngleRad);
+        sin = Math.sin(mLightAngleRad);
+        startX = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * cos);
+        startY = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * sin);
+        canvas.drawCircle(startX, startY, mStrokeWidth / 3, mIndicatorPaint);
     }
 
     @Override
@@ -208,7 +241,7 @@ public class ColorPickView extends View {
                 if (distanceFromCenter >= mColorWheelRadius - mStrokeWidth / 2 && distanceFromCenter < mColorWheelRadius + mStrokeWidth / 2) {
                     // The point is in the color wheel
                     mIsInColorWheel = true;
-                    mColorAngle = angle;
+                    mColorAngleRad = angle;
                     invalidate();
                 } else if (distanceFromCenter >= mSaturationLightWheelRadius - mStrokeWidth / 2 &&
                         distanceFromCenter < mSaturationLightWheelRadius + mStrokeWidth / 2) {
@@ -216,11 +249,11 @@ public class ColorPickView extends View {
                     if (y >= 0) {
                         // The point is in the saturation arc
                         mIsInSaturationArc = true;
-                        mSaturationAngle = angle;
+                        mSaturationAngleRad = angle;
                     } else {
                         // The point is in the light arc
                         mIsInLightArc = true;
-                        mLightAngle = angle;
+                        mLightAngleRad = angle;
                     }
                     invalidate();
                 } else {
@@ -232,21 +265,21 @@ public class ColorPickView extends View {
 
             case MotionEvent.ACTION_MOVE:
                 if (mIsInColorWheel) {
-                    mColorAngle = angle;
+                    mColorAngleRad = angle;
                     invalidate();
                 } else if (mIsInSaturationArc) {
                     if (y < 0) {
                         // Jump outside the saturation arc
                         return false;
                     }
-                    mSaturationAngle = angle;
+                    mSaturationAngleRad = angle;
                     invalidate();
                 } else if (mIsInLightArc) {
                     if (y >= 0) {
                         // Jump outside the light arc
                         return false;
                     }
-                    mLightAngle = angle;
+                    mLightAngleRad = angle;
                     invalidate();
                 } else {
                     // The point was nowhere interesting
