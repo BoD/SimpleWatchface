@@ -24,6 +24,7 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <resources>
-    <dimen name="color_pick_stroke_width">24dp</dimen>
-    <dimen name="color_pick_spacer">1dp</dimen>
+    <dimen name="color_pick_stroke_width">28dp</dimen>
+    <dimen name="color_pick_spacer">1px</dimen>
+    <dimen name="color_pick_indicator_stroke_width">2dp</dimen>
 </resources>

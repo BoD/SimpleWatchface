@@ -25,9 +25,13 @@
 package org.jraf.android.simplewatchface.wear.view;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.RectF;
 import android.graphics.Shader;
 import android.graphics.SweepGradient;
@@ -38,7 +42,7 @@ import android.view.View;
 import org.jraf.android.simplewatchface.R;
 
 public class ColorPickView extends View {
-    private static final int[] COLORS = new int[] {0xFFFF0000, 0xFFFF00FF, 0xFF0000FF, 0xFF00FFFF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000};
+    private static final int[] HUE_COLORS = new int[] {0xFFFF0000, 0xFFFF00FF, 0xFF0000FF, 0xFF00FFFF, 0xFF00FF00, 0xFFFFFF00, 0xFFFF0000};
     public static final float[] LIGHT_POSITIONS = new float[] {.5f, .75f, 1f};
     public static final float[] SATURATION_POSITIONS = new float[] {0f, .5f};
 
@@ -60,19 +64,22 @@ public class ColorPickView extends View {
     private int[] mLightColors = new int[3];
     private float mLightAngleRad;
 
-    // Ok half circle
-    private Paint mOkHalfCirclePaint;
-    private RectF mOkCancelRectangle = new RectF();
-    private float mOkCancelRadius;
+    // Confirm half circle
+    private Paint mConfirmHalfCirclePaint;
+    private RectF mConfirmCancelRectangle = new RectF();
+    private float mConfirmCancelRadius;
+    private Paint mConfirmCancelIconsPaint;
+    private Bitmap mConfirmBitmap;
 
     // Cancel half circle
-    private Paint mCancelHalfCirclePaint;
+    private Bitmap mCancelBitmap;
 
     // Indicator / separator
     private Paint mIndicatorPaint;
 
-    private float mStrokeWidth;
+    private float mStrokePx;
     private int mSpacerPx;
+    private int mIndicatorStrokePx;
 
     private int mTranslationOffset;
     private boolean mIsInColorWheel;
@@ -80,6 +87,7 @@ public class ColorPickView extends View {
     private boolean mIsInLightArc;
     private float[] mHsl = new float[3];
     private float[] mHsv = new float[3];
+    private int mOldColor;
 
     public ColorPickView(Context context) {
         super(context);
@@ -102,37 +110,42 @@ public class ColorPickView extends View {
     }
 
     private void init() {
-        mStrokeWidth = getResources().getDimensionPixelSize(R.dimen.color_pick_stroke_width);
+        mStrokePx = getResources().getDimensionPixelSize(R.dimen.color_pick_stroke_width);
         mSpacerPx = getResources().getDimensionPixelSize(R.dimen.color_pick_spacer);
+        mIndicatorStrokePx = getResources().getDimensionPixelSize(R.dimen.color_pick_indicator_stroke_width);
 
         // Color
         mColorWheelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        Shader shader = new SweepGradient(0, 0, COLORS, null);
+        Shader shader = new SweepGradient(0, 0, HUE_COLORS, null);
         mColorWheelPaint.setShader(shader);
         mColorWheelPaint.setStyle(Paint.Style.STROKE);
-        mColorWheelPaint.setStrokeWidth(mStrokeWidth);
+        mColorWheelPaint.setStrokeWidth(mStrokePx);
 
         // Saturation
         mSaturationArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mSaturationArcPaint.setStyle(Paint.Style.STROKE);
-        mSaturationArcPaint.setStrokeWidth(mStrokeWidth);
+        mSaturationArcPaint.setStrokeWidth(mStrokePx);
         mSaturationColors[1] = 0xFF808080; // grey
 
         // Light
         mLightArcPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLightArcPaint.setStyle(Paint.Style.STROKE);
-        mLightArcPaint.setStrokeWidth(mStrokeWidth);
+        mLightArcPaint.setStrokeWidth(mStrokePx);
         mLightColors[0] = 0xFF000000; // black
         mLightColors[2] = 0xFFFFFFFF; // white
 
-        // OK
-        mOkHalfCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        mOkHalfCirclePaint.setStyle(Paint.Style.FILL);
+        // Confirm
+        mConfirmHalfCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mConfirmHalfCirclePaint.setStyle(Paint.Style.FILL);
+        mConfirmCancelIconsPaint = new Paint();
+        mConfirmBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.color_pick_confirm);
+
+        // Cancel
+        mCancelBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.color_pick_cancel);
 
         // Indicator / separator
         mIndicatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mIndicatorPaint.setStyle(Paint.Style.STROKE);
-        mIndicatorPaint.setStrokeWidth(mSpacerPx);
     }
 
 
@@ -141,24 +154,30 @@ public class ColorPickView extends View {
         super.onDraw(canvas);
         canvas.translate(mTranslationOffset, mTranslationOffset);
 
-        int color = angleToColor(mColorAngleRad);
+        // Background
+        canvas.drawColor(0xFF000000); // black
+
+        // This is the "position" between 0 and 1 (in other words, a number of turns of the circle)
+        float huePosition = (float) (mColorAngleRad / (2 * Math.PI));
+        if (huePosition < 0) huePosition += 1;
+        int hueColor = getColorOnGradient(huePosition, HUE_COLORS);
 
         // Color wheel
         canvas.drawOval(mColorWheelRect, mColorWheelPaint);
 
         // Saturation arc
-        mSaturationColors[0] = color;
+        mSaturationColors[0] = hueColor;
         Shader shader = new SweepGradient(0, 0, mSaturationColors, SATURATION_POSITIONS);
         mSaturationArcPaint.setShader(shader);
         canvas.drawArc(mSaturationLightRect, 0, 180, false, mSaturationArcPaint);
 
         // Light arc
-        mLightColors[1] = color;
+        mLightColors[1] = hueColor;
         shader = new SweepGradient(0, 0, mLightColors, LIGHT_POSITIONS);
         mLightArcPaint.setShader(shader);
         canvas.drawArc(mSaturationLightRect, 180, 180, false, mLightArcPaint);
 
-        // OK half circle
+        // Confirm half circle
         float hue = (float) Math.toDegrees(mColorAngleRad); // rad to deg
         if (hue < 0) hue = hue + 360;
         hue = 360 - hue; // invert
@@ -175,36 +194,73 @@ public class ColorPickView extends View {
         mHsl[2] = (float) lightTurn;
 
         hslToHsv(mHsl, mHsv);
-        mOkHalfCirclePaint.setColor(Color.HSVToColor(mHsv));
+        int resultColor = Color.HSVToColor(mHsv);
+        mConfirmHalfCirclePaint.setColor(resultColor);
 
-        canvas.drawArc(mOkCancelRectangle, 180, 180, false, mOkHalfCirclePaint);
+        canvas.drawArc(mConfirmCancelRectangle, 180, 180, false, mConfirmHalfCirclePaint);
+
+        // Confirm icon
+        int iconLeft = -mConfirmBitmap.getWidth() / 2;
+        float iconTop = (-mTranslationOffset + mStrokePx * 2 + mSpacerPx) / 2 - mConfirmBitmap.getHeight() / 2;
+        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(invertColor(resultColor), PorterDuff.Mode.SRC_ATOP);
+        mConfirmCancelIconsPaint.setColorFilter(colorFilter);
+        canvas.drawBitmap(mConfirmBitmap, iconLeft, iconTop, mConfirmCancelIconsPaint);
+
+        // Cancel half circle
+        mConfirmHalfCirclePaint.setColor(mOldColor);
+        canvas.drawArc(mConfirmCancelRectangle, 0, 180, false, mConfirmHalfCirclePaint);
+
+        // Cancel icon
+        iconLeft = -mCancelBitmap.getWidth() / 2;
+        iconTop = (mTranslationOffset - mStrokePx * 2 - mSpacerPx) / 2 - mCancelBitmap.getWidth() / 2;
+        colorFilter = new PorterDuffColorFilter(invertColor(mOldColor), PorterDuff.Mode.SRC_ATOP);
+        mConfirmCancelIconsPaint.setColorFilter(colorFilter);
+        canvas.drawBitmap(mCancelBitmap, iconLeft, iconTop, mConfirmCancelIconsPaint);
 
         // Separator
+        mIndicatorPaint.setStrokeWidth(mSpacerPx);
         mIndicatorPaint.setColor(0xFF000000); // black
-        canvas.drawLine(-mTranslationOffset + mStrokeWidth, 0, mTranslationOffset - mStrokeWidth, 0, mIndicatorPaint);
+        canvas.drawLine(-mTranslationOffset + mStrokePx, 0, mTranslationOffset - mStrokePx, 0, mIndicatorPaint);
 
         // Color indicator
-        int invertColor = Color.rgb(255 - Color.red(color), 255 - Color.green(color), 255 - Color.blue(color));
+        mIndicatorPaint.setStrokeWidth(mIndicatorStrokePx);
+        int invertColor = Color.rgb(255 - Color.red(hueColor), 255 - Color.green(hueColor), 255 - Color.blue(hueColor));
         mIndicatorPaint.setColor(invertColor);
         double cos = Math.cos(mColorAngleRad);
         double sin = Math.sin(mColorAngleRad);
-        int startX = (int) ((mTranslationOffset - mStrokeWidth / 2) * cos);
-        int startY = (int) ((mTranslationOffset - mStrokeWidth / 2) * sin);
-        canvas.drawCircle(startX, startY, mStrokeWidth / 3, mIndicatorPaint);
+        int startX = (int) ((mTranslationOffset - mStrokePx / 2) * cos);
+        int startY = (int) ((mTranslationOffset - mStrokePx / 2) * sin);
+        canvas.drawCircle(startX, startY, mStrokePx / 3, mIndicatorPaint);
 
         // Saturation indicator
+        // Color
+        int saturationColor = getColorOnGradient(1f - (float) saturationTurn, mSaturationColors);
+        float[] invertHsv = new float[3];
+        Color.colorToHSV(saturationColor, invertHsv);
+        invertHsv[0] = (invertHsv[0] + 180) % 360; // Invert hue
+        invertHsv[2] = 1f; // Max up value
+        invertColor = Color.HSVToColor(invertHsv);
+        mIndicatorPaint.setColor(invertColor);
+        // Position
         cos = Math.cos(mSaturationAngleRad);
         sin = Math.sin(mSaturationAngleRad);
-        startX = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * cos);
-        startY = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * sin);
-        canvas.drawCircle(startX, startY, mStrokeWidth / 3, mIndicatorPaint);
+        startX = (int) ((mTranslationOffset - mStrokePx / 2 - mStrokePx - mSpacerPx) * cos);
+        startY = (int) ((mTranslationOffset - mStrokePx / 2 - mStrokePx - mSpacerPx) * sin);
+        canvas.drawCircle(startX, startY, mStrokePx / 3, mIndicatorPaint);
 
         // Light indicator
+        // Color
+        int lightColor = getColorOnGradient(1f - (float) lightTurn, mLightColors);
+        Color.colorToHSV(lightColor, invertHsv);
+        invertHsv[0] = (invertHsv[0] + 180) % 360; // Invert hue
+        invertColor = Color.HSVToColor(invertHsv);
+        mIndicatorPaint.setColor(invertColor);
+        // Position
         cos = Math.cos(mLightAngleRad);
         sin = Math.sin(mLightAngleRad);
-        startX = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * cos);
-        startY = (int) ((mTranslationOffset - mStrokeWidth / 2 - mStrokeWidth - mSpacerPx) * sin);
-        canvas.drawCircle(startX, startY, mStrokeWidth / 3, mIndicatorPaint);
+        startX = (int) ((mTranslationOffset - mStrokePx / 2 - mStrokePx - mSpacerPx) * cos);
+        startY = (int) ((mTranslationOffset - mStrokePx / 2 - mStrokePx - mSpacerPx) * sin);
+        canvas.drawCircle(startX, startY, mStrokePx / 3, mIndicatorPaint);
     }
 
     @Override
@@ -215,14 +271,14 @@ public class ColorPickView extends View {
         setMeasuredDimension(min, min);
         mTranslationOffset = min / 2;
 
-        mColorWheelRadius = (min - mStrokeWidth) / 2;
+        mColorWheelRadius = (min - mStrokePx) / 2;
         mColorWheelRect.set(-mColorWheelRadius, -mColorWheelRadius, mColorWheelRadius, mColorWheelRadius);
 
-        mSaturationLightWheelRadius = mColorWheelRadius - mSpacerPx - mStrokeWidth;
+        mSaturationLightWheelRadius = mColorWheelRadius - mSpacerPx - mStrokePx;
         mSaturationLightRect.set(-mSaturationLightWheelRadius, -mSaturationLightWheelRadius, mSaturationLightWheelRadius, mSaturationLightWheelRadius);
 
-        mOkCancelRadius = mSaturationLightWheelRadius - mSpacerPx - mStrokeWidth / 2;
-        mOkCancelRectangle.set(-mOkCancelRadius, -mOkCancelRadius, mOkCancelRadius, mOkCancelRadius);
+        mConfirmCancelRadius = mSaturationLightWheelRadius - mSpacerPx - mStrokePx / 2;
+        mConfirmCancelRectangle.set(-mConfirmCancelRadius, -mConfirmCancelRadius, mConfirmCancelRadius, mConfirmCancelRadius);
     }
 
     @Override
@@ -238,13 +294,13 @@ public class ColorPickView extends View {
             case MotionEvent.ACTION_DOWN:
                 double distanceFromCenter = Math.sqrt(x * x + y * y);
 
-                if (distanceFromCenter >= mColorWheelRadius - mStrokeWidth / 2 && distanceFromCenter < mColorWheelRadius + mStrokeWidth / 2) {
+                if (distanceFromCenter >= mColorWheelRadius - mStrokePx / 2 && distanceFromCenter < mColorWheelRadius + mStrokePx / 2) {
                     // The point is in the color wheel
                     mIsInColorWheel = true;
                     mColorAngleRad = angle;
                     invalidate();
-                } else if (distanceFromCenter >= mSaturationLightWheelRadius - mStrokeWidth / 2 &&
-                        distanceFromCenter < mSaturationLightWheelRadius + mStrokeWidth / 2) {
+                } else if (distanceFromCenter >= mSaturationLightWheelRadius - mStrokePx / 2 &&
+                        distanceFromCenter < mSaturationLightWheelRadius + mStrokePx / 2) {
                     // The point is in the saturation / light wheel
                     if (y >= 0) {
                         // The point is in the saturation arc
@@ -299,32 +355,29 @@ public class ColorPickView extends View {
     }
 
     /**
-     * Calculate the color using the supplied angle.
+     * Calculate the color using the supplied position on a gradient.
      *
-     * @param angle The selected color's position expressed as angle (in rad).
-     * @return The ARGB value of the color on the color wheel at the specified angle.
+     * @param position The selected color's position (from 0 to 1).
+     * @param colors   The colors of the gradient.
+     * @return The ARGB value of the color on the gradient at the specified position.
      */
-    private int angleToColor(float angle) {
-        // This is the "scale" between 0 and 1 (in other words, a number of turns of the circle)
-        float scale = (float) (angle / (2 * Math.PI));
-        if (scale < 0) scale += 1;
-
-        if (scale <= 0) {
-            return COLORS[0];
+    private int getColorOnGradient(float position, int[] colors) {
+        if (position <= 0) {
+            return colors[0];
         }
-        if (scale >= 1) {
-            return COLORS[COLORS.length - 1];
+        if (position >= 1) {
+            return colors[colors.length - 1];
         }
 
-        // Get the value of the scale in relation to the colors
-        float span = scale * (COLORS.length - 1);
+        // Get the value of the position in relation to the colors
+        float span = position * (colors.length - 1);
         // Index of the nearest color
         int colorIndex = (int) span;
         // Factor between 0 and 1 to calculate how close of colorA or colorB we are
         float factor = span - colorIndex;
 
-        int colorA = COLORS[colorIndex];
-        int colorB = COLORS[colorIndex + 1];
+        int colorA = colors[colorIndex];
+        int colorB = colors[colorIndex + 1];
         int r = average(Color.red(colorA), Color.red(colorB), factor);
         int g = average(Color.green(colorA), Color.green(colorB), factor);
         int b = average(Color.blue(colorA), Color.blue(colorB), factor);
@@ -384,7 +437,12 @@ public class ColorPickView extends View {
         outHsl[2] = l / 2;
     }
 
+    private static int invertColor(int color) {
+        return ((~color) | 0xFF000000) | (color & 0xFF000000);
+    }
+
     public void setOldColor(int oldColor) {
+        mOldColor = oldColor;
         float[] hsv = new float[3];
         float[] hsl = new float[3];
         Color.colorToHSV(oldColor, hsv);
