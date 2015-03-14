@@ -82,10 +82,14 @@ public class ColorPickView extends View {
     private int mSpacerPx;
     private int mIndicatorStrokePx;
 
+    private ColorPickListener mListener;
+
     private int mTranslationOffset;
     private boolean mIsInColorWheel;
     private boolean mIsInSaturationArc;
     private boolean mIsInLightArc;
+    private boolean mIsInCancel;
+    private boolean mIsInOk;
     private float[] mHsl = new float[3];
     private float[] mHsv = new float[3];
     private int mPickedColor;
@@ -201,6 +205,8 @@ public class ColorPickView extends View {
         hslToHsv(mHsl, mHsv);
         mPickedColor = Color.HSVToColor(mHsv);
         mConfirmHalfCirclePaint.setColor(mPickedColor);
+        // Inform listener
+        if (mListener != null) mListener.onColorPicked(mPickedColor);
 
         canvas.drawArc(mConfirmCancelRectangle, 180, 180, false, mConfirmHalfCirclePaint);
 
@@ -319,6 +325,15 @@ public class ColorPickView extends View {
                         mLightAngleRad = angle;
                     }
                     invalidate();
+                } else if (distanceFromCenter < mSaturationLightWheelRadius - mStrokePx / 2) {
+                    // The point is in the OK / Cancel center circle
+                    if (y >= 0) {
+                        // The point is in the Cancel half circle
+                        mIsInCancel = true;
+                    } else {
+                        // The point is in the OK half circle
+                        mIsInOk = true;
+                    }
                 } else {
                     // If user did not press pointer or center, report event not handled
                     getParent().requestDisallowInterceptTouchEvent(false);
@@ -352,6 +367,13 @@ public class ColorPickView extends View {
                 break;
 
             case MotionEvent.ACTION_UP:
+                if (mIsInCancel) {
+                    onCancelPressed();
+                } else if (mIsInOk) {
+                    onOkPressed();
+                }
+                mIsInCancel = false;
+                mIsInOk = false;
                 mIsInColorWheel = false;
                 mIsInLightArc = false;
                 mIsInSaturationArc = false;
@@ -451,6 +473,15 @@ public class ColorPickView extends View {
     }
 
     /**
+     * Sets the listener to use for callbacks.
+     *
+     * @param listener The listener to use for callbacks.
+     */
+    public void setListener(ColorPickListener listener) {
+        mListener = listener;
+    }
+
+    /**
      * Sets the old color to show on the bottom "Cancel" half circle, and also the initial value for the picked color.
      * The default value is black.
      *
@@ -475,5 +506,13 @@ public class ColorPickView extends View {
      */
     public int getPickedColor() {
         return mPickedColor;
+    }
+
+    private void onOkPressed() {
+        if (mListener != null) mListener.onOkPressed(mPickedColor);
+    }
+
+    private void onCancelPressed() {
+        if (mListener != null) mListener.onCancelPressed();
     }
 }

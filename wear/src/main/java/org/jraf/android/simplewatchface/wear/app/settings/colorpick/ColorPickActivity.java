@@ -29,7 +29,9 @@ import android.os.Bundle;
 import android.widget.TextView;
 
 import org.jraf.android.simplewatchface.R;
+import org.jraf.android.simplewatchface.wear.view.ColorPickListener;
 import org.jraf.android.simplewatchface.wear.view.ColorPickView;
+import org.jraf.android.util.log.wrapper.Log;
 
 public class ColorPickActivity extends Activity {
     private TextView mTextView;
@@ -40,5 +42,21 @@ public class ColorPickActivity extends Activity {
         setContentView(R.layout.color_pick);
         ColorPickView colorPickView = (ColorPickView) findViewById(R.id.colorPick);
         colorPickView.setOldColor(0xFFa3f556);
+        colorPickView.setListener(new ColorPickListener() {
+            @Override
+            public void onColorPicked(int pickedColor) {
+                Log.d("pickedColor=" + Integer.toHexString(pickedColor));
+            }
+
+            @Override
+            public void onOkPressed(int pickedColor) {
+                Log.d("pickedColor=" + Integer.toHexString(pickedColor));
+            }
+
+            @Override
+            public void onCancelPressed() {
+                Log.d();
+            }
+        });
     }
 }
