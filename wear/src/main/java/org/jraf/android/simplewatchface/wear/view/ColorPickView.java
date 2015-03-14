@@ -116,9 +116,9 @@ public class ColorPickView extends View {
     }
 
     private void init() {
-        mStrokePx = getResources().getDimensionPixelSize(R.dimen.color_pick_stroke_width);
-        mSpacerPx = getResources().getDimensionPixelSize(R.dimen.color_pick_spacer);
-        mIndicatorStrokePx = getResources().getDimensionPixelSize(R.dimen.color_pick_indicator_stroke_width);
+        mStrokePx = getResources().getDimensionPixelSize(R.dimen.awcp_stroke_width);
+        mSpacerPx = getResources().getDimensionPixelSize(R.dimen.awcp_spacer);
+        mIndicatorStrokePx = getResources().getDimensionPixelSize(R.dimen.awcp_indicator_stroke_width);
 
         // Color
         mColorWheelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -204,11 +204,24 @@ public class ColorPickView extends View {
 
         hslToHsv(mHsl, mHsv);
         mPickedColor = Color.HSVToColor(mHsv);
-        mConfirmHalfCirclePaint.setColor(mPickedColor);
         // Inform listener
         if (mListener != null) mListener.onColorPicked(mPickedColor);
 
+        mConfirmHalfCirclePaint.setColor(mPickedColor);
         canvas.drawArc(mConfirmCancelRectangle, 180, 180, false, mConfirmHalfCirclePaint);
+        if (mIsInOk) {
+            // Specific color for the pressed state (either darker or lighter, depending on current light)
+            int pressedColor;
+            if (mHsl[2] > .9f) {
+                // Darker
+                pressedColor = 0x22000000; // black
+            } else {
+                // Lighter
+                pressedColor = 0x44FFFFFF; // white
+            }
+            mConfirmHalfCirclePaint.setColor(pressedColor);
+            canvas.drawArc(mConfirmCancelRectangle, 180, 180, false, mConfirmHalfCirclePaint);
+        }
 
         // Confirm icon
         int iconLeft = -mConfirmBitmap.getWidth() / 2;
@@ -221,6 +234,22 @@ public class ColorPickView extends View {
         // Cancel half circle
         mConfirmHalfCirclePaint.setColor(mOldColor);
         canvas.drawArc(mConfirmCancelRectangle, 0, 180, false, mConfirmHalfCirclePaint);
+        if (mIsInCancel) {
+            // Specific color for the pressed state (either darker or lighter, depending on current light)
+            int pressedColor;
+            float[] oldHsv = new float[3];
+            Color.colorToHSV(mOldColor, oldHsv);
+            float[] oldHsl = new float[3];
+            if (oldHsl[2] > .9f) {
+                // Darker
+                pressedColor = 0x22000000; // black
+            } else {
+                // Lighter
+                pressedColor = 0x44FFFFFF; // white
+            }
+            mConfirmHalfCirclePaint.setColor(pressedColor);
+            canvas.drawArc(mConfirmCancelRectangle, 0, 180, false, mConfirmHalfCirclePaint);
+        }
 
         // Cancel icon
         iconLeft = -mCancelBitmap.getWidth() / 2;
@@ -303,10 +332,9 @@ public class ColorPickView extends View {
         float y = event.getY() - mTranslationOffset;
 
         float angle = (float) Math.atan2(y, x);
+        double distanceFromCenter = Math.sqrt(x * x + y * y);
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                double distanceFromCenter = Math.sqrt(x * x + y * y);
-
                 if (distanceFromCenter >= mColorWheelRadius - mStrokePx / 2 && distanceFromCenter < mColorWheelRadius + mStrokePx / 2) {
                     // The point is in the color wheel
                     mIsInColorWheel = true;
@@ -334,6 +362,7 @@ public class ColorPickView extends View {
                         // The point is in the OK half circle
                         mIsInOk = true;
                     }
+                    invalidate();
                 } else {
                     // If user did not press pointer or center, report event not handled
                     getParent().requestDisallowInterceptTouchEvent(false);
@@ -343,9 +372,13 @@ public class ColorPickView extends View {
 
             case MotionEvent.ACTION_MOVE:
                 if (mIsInColorWheel) {
+                    mIsInCancel = false;
+                    mIsInOk = false;
                     mColorAngleRad = angle;
                     invalidate();
                 } else if (mIsInSaturationArc) {
+                    mIsInCancel = false;
+                    mIsInOk = false;
                     if (y < 0) {
                         // Jump outside the saturation arc
                         return false;
@@ -353,12 +386,26 @@ public class ColorPickView extends View {
                     mSaturationAngleRad = angle;
                     invalidate();
                 } else if (mIsInLightArc) {
+                    mIsInCancel = false;
+                    mIsInOk = false;
                     if (y >= 0) {
                         // Jump outside the light arc
                         return false;
                     }
                     mLightAngleRad = angle;
                     invalidate();
+                } else if (mIsInOk) {
+                    if (distanceFromCenter >= mSaturationLightWheelRadius - mStrokePx / 2 || y >= 0) {
+                        // Jump outside the half circle
+                        mIsInOk = false;
+                        invalidate();
+                    }
+                } else if (mIsInCancel) {
+                    if (distanceFromCenter >= mSaturationLightWheelRadius - mStrokePx / 2 || y < 0) {
+                        // Jump outside the half circle
+                        mIsInCancel = false;
+                        invalidate();
+                    }
                 } else {
                     // The point was nowhere interesting
                     getParent().requestDisallowInterceptTouchEvent(false);

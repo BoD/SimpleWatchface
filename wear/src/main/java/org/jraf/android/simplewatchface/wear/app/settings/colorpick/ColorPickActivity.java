@@ -24,8 +24,10 @@
  */
 package org.jraf.android.simplewatchface.wear.app.settings.colorpick;
 
+import android.animation.Animator;
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.TextView;
 
 import org.jraf.android.simplewatchface.R;
@@ -34,15 +36,16 @@ import org.jraf.android.simplewatchface.wear.view.ColorPickView;
 import org.jraf.android.util.log.wrapper.Log;
 
 public class ColorPickActivity extends Activity {
+    private static final long CONFIRM_ANIM_DURATION = 1000;
+
     private TextView mTextView;
+    private View mConfirmLayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.color_pick);
-        ColorPickView colorPickView = (ColorPickView) findViewById(R.id.colorPick);
-        colorPickView.setOldColor(0xFFa3f556);
-        colorPickView.setListener(new ColorPickListener() {
+        super.onCreate(savedInstanceState); setContentView(R.layout.awcp_color_pick);
+        ColorPickView colorPickView = (ColorPickView) findViewById(R.id.awcp_colorPick); mConfirmLayer = findViewById(R.id.awcp_confirmLayer);
+        colorPickView.setOldColor(0xFFa3f556); colorPickView.setListener(new ColorPickListener() {
             @Override
             public void onColorPicked(int pickedColor) {
                 Log.d("pickedColor=" + Integer.toHexString(pickedColor));
@@ -50,12 +53,38 @@ public class ColorPickActivity extends Activity {
 
             @Override
             public void onOkPressed(int pickedColor) {
-                Log.d("pickedColor=" + Integer.toHexString(pickedColor));
+                Log.d("pickedColor=" + Integer.toHexString(pickedColor)); startConfirmAnimation(pickedColor);
             }
 
             @Override
             public void onCancelPressed() {
                 Log.d();
+            }
+        });
+    }
+
+    private void startConfirmAnimation(int pickedColor) {
+        mConfirmLayer.setBackgroundColor(pickedColor);
+        mConfirmLayer.setAlpha(0);
+        mConfirmLayer.animate().alpha(1).setDuration(CONFIRM_ANIM_DURATION).setListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                finish();
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
             }
         });
     }
