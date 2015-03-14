@@ -365,7 +365,7 @@ public class ColorPickView extends View {
      * Calculate the color using the supplied position on a gradient.
      *
      * @param position The selected color's position (from 0 to 1).
-     * @param colors   The colors of the gradient.
+     * @param colors The colors of the gradient.
      * @return The ARGB value of the color on the gradient at the specified position.
      */
     private int getColorOnGradient(float position, int[] colors) {
@@ -402,8 +402,8 @@ public class ColorPickView extends View {
      * - http://en.wikipedia.org/wiki/HSL_and_HSV and
      * - http://ariya.blogspot.com.ar/2008/07/converting-between-hsl-and-hsv.html
      *
-     * @param inHsl  HSL color to convert.
-     * @param outHsv converted HSV color.
+     * @param inHsl the HSL color to convert.
+     * @param outHsv the converted HSV color.
      */
     private static void hslToHsv(float[] inHsl, float[] outHsv) {
         outHsv[0] = inHsl[0];
@@ -426,8 +426,8 @@ public class ColorPickView extends View {
      * - http://en.wikipedia.org/wiki/HSL_and_HSV and
      * - http://ariya.blogspot.com.ar/2008/07/converting-between-hsl-and-hsv.html
      *
-     * @param inHsv  HSv color to convert.
-     * @param outHsl converted HSL color.
+     * @param inHsv the HSV color to convert.
+     * @param outHsl the converted HSL color.
      */
     private static void hsvToHsl(float[] inHsv, float[] outHsl) {
         outHsl[0] = inHsv[0];
@@ -470,6 +470,7 @@ public class ColorPickView extends View {
 
     /**
      * Returns the color picked by the user.
+     *
      * @return The picked color as an ARGB int.
      */
     public int getPickedColor() {
