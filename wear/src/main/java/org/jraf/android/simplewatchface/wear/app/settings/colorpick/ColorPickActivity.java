@@ -39,6 +39,6 @@ public class ColorPickActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.color_pick);
         ColorPickView colorPickView = (ColorPickView) findViewById(R.id.colorPick);
-        colorPickView.setOldColor(0xFFe8e8e8);
+        colorPickView.setOldColor(0xFFa3f556);
     }
 }

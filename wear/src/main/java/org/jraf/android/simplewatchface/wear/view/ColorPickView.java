@@ -77,6 +77,7 @@ public class ColorPickView extends View {
     // Indicator / separator
     private Paint mIndicatorPaint;
 
+    // Dimens
     private float mStrokePx;
     private int mSpacerPx;
     private int mIndicatorStrokePx;
@@ -87,6 +88,7 @@ public class ColorPickView extends View {
     private boolean mIsInLightArc;
     private float[] mHsl = new float[3];
     private float[] mHsv = new float[3];
+    private int mPickedColor;
     private int mOldColor;
 
     public ColorPickView(Context context) {
@@ -146,6 +148,9 @@ public class ColorPickView extends View {
         // Indicator / separator
         mIndicatorPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         mIndicatorPaint.setStyle(Paint.Style.STROKE);
+
+        // Default old color
+        setOldColor(0xFF000000); // black
     }
 
 
@@ -194,15 +199,16 @@ public class ColorPickView extends View {
         mHsl[2] = (float) lightTurn;
 
         hslToHsv(mHsl, mHsv);
-        int resultColor = Color.HSVToColor(mHsv);
-        mConfirmHalfCirclePaint.setColor(resultColor);
+        mPickedColor = Color.HSVToColor(mHsv);
+        mConfirmHalfCirclePaint.setColor(mPickedColor);
 
         canvas.drawArc(mConfirmCancelRectangle, 180, 180, false, mConfirmHalfCirclePaint);
 
         // Confirm icon
         int iconLeft = -mConfirmBitmap.getWidth() / 2;
         float iconTop = (-mTranslationOffset + mStrokePx * 2 + mSpacerPx) / 2 - mConfirmBitmap.getHeight() / 2;
-        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(invertColor(resultColor), PorterDuff.Mode.SRC_ATOP);
+        // Draw it with an inverted color so it is always visible
+        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(invertColor(mPickedColor), PorterDuff.Mode.SRC_ATOP);
         mConfirmCancelIconsPaint.setColorFilter(colorFilter);
         canvas.drawBitmap(mConfirmBitmap, iconLeft, iconTop, mConfirmCancelIconsPaint);
 
@@ -213,6 +219,7 @@ public class ColorPickView extends View {
         // Cancel icon
         iconLeft = -mCancelBitmap.getWidth() / 2;
         iconTop = (mTranslationOffset - mStrokePx * 2 - mSpacerPx) / 2 - mCancelBitmap.getWidth() / 2;
+        // Draw it with an inverted color so it is always visible
         colorFilter = new PorterDuffColorFilter(invertColor(mOldColor), PorterDuff.Mode.SRC_ATOP);
         mConfirmCancelIconsPaint.setColorFilter(colorFilter);
         canvas.drawBitmap(mCancelBitmap, iconLeft, iconTop, mConfirmCancelIconsPaint);
@@ -427,7 +434,9 @@ public class ColorPickView extends View {
 
         float l = (2 - inHsv[1]) * inHsv[2];
         float s = inHsv[1] * inHsv[2];
-        if (l <= 1) {
+        if (l == 0) {
+            s = 0;
+        } else if (l <= 1) {
             s /= l;
         } else {
             s /= 2 - l;
@@ -441,6 +450,12 @@ public class ColorPickView extends View {
         return ((~color) | 0xFF000000) | (color & 0xFF000000);
     }
 
+    /**
+     * Sets the old color to show on the bottom "Cancel" half circle, and also the initial value for the picked color.
+     * The default value is black.
+     *
+     * @param oldColor The old color to use as an ARGB int (the alpha component is ignored).
+     */
     public void setOldColor(int oldColor) {
         mOldColor = oldColor;
         float[] hsv = new float[3];
@@ -451,5 +466,13 @@ public class ColorPickView extends View {
         mSaturationAngleRad = (float) (2 * Math.PI * (1 - hsl[1]) / 2);
         mLightAngleRad = (float) (2 * Math.PI * (.5 + hsl[2] / 2));
         invalidate();
+    }
+
+    /**
+     * Returns the color picked by the user.
+     * @return The picked color as an ARGB int.
+     */
+    public int getPickedColor() {
+        return mPickedColor;
     }
 }
