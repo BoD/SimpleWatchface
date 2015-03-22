@@ -24,14 +24,14 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <resources>
-    <color name="background_normal">#024</color>
+    <color name="default_background">#024</color>
+    <color name="default_hourMinutes">#9EF</color>
+    <color name="default_seconds">#AFF</color>
+    <color name="default_date">#5DF</color>
+    <color name="default_amPm">#D9EF</color>
+
     <color name="background_ambient">#000</color>
-
-    <color name="time_normal">#9EF</color>
     <color name="time_ambient">#FFF</color>
-
-    <color name="date_normal">#5DF</color>
     <color name="date_ambient">#FFF</color>
 
-    <color name="amPm_normal">#D9EF</color>
 </resources>

@@ -24,6 +24,7 @@
  */
 package org.jraf.android.simplewatchface.wear.app.watchface;
 
+import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
@@ -40,6 +41,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
+import org.jraf.android.simplewatchface.wear.app.settings.PreferenceHelper;
 import org.jraf.android.util.log.wrapper.Log;
 
 import java.text.SimpleDateFormat;
@@ -95,6 +97,12 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private int mColorBackgroundAmbient;
         private int mColorDateNormal;
         private int mColorDateAmbient;
+        private int mColorTimeNormal;
+        private int mColorTimeAmbient;
+        private int mColorSecondsNormal;
+        private int mColorAmPmNormal;
+
+        private PreferenceHelper mPreferenceHelper;
 
         private Paint mBackgroundPaint;
         private Paint mHourMinutesAmbientPaint;
@@ -128,6 +136,15 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             }
         };
 
+        private SharedPreferences.OnSharedPreferenceChangeListener mOnSharedPreferenceChangeListener =
+                new SharedPreferences.OnSharedPreferenceChangeListener() {
+                    @Override
+                    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                        updateColors();
+                        updatePaints();
+                    }
+                };
+
         @Override
         public void invalidate() {
             Log.d();
@@ -151,20 +168,14 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             builder.setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR);
             setWatchFaceStyle(builder.build());
 
+            mPreferenceHelper = PreferenceHelper.get(SimpleWatchFaceService.this);
+
             // Typefaces
             Typeface timeTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-ExtraBoldItalic.ttf");
             Typeface dateTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-Italic.ttf");
 //            Typeface timeTypeface = Typeface.SANS_SERIF;
 //            Typeface dateTypeface = Typeface.SANS_SERIF;
 
-            // Colors
-            mColorBackgroundNormal = getResources().getColor(R.color.background_normal);
-            mColorBackgroundAmbient = getResources().getColor(R.color.background_ambient);
-            int colorTimeNormal = getResources().getColor(R.color.time_normal);
-            int colorTimeAmbient = getResources().getColor(R.color.time_ambient);
-            mColorDateNormal = getResources().getColor(R.color.date_normal);
-            mColorDateAmbient = getResources().getColor(R.color.date_ambient);
-            int colorAmPmNormal = getResources().getColor(R.color.amPm_normal);
 
             // Paints
             mBackgroundPaint = new Paint();
@@ -174,34 +185,52 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mHourMinutesAmbientPaint = new Paint();
             mHourMinutesAmbientPaint.setTypeface(timeTypeface);
             mHourMinutesAmbientPaint.setTextSize(150);
-            mHourMinutesAmbientPaint.setColor(colorTimeAmbient);
 
             mHourMinutesNormalPaint = new Paint();
             mHourMinutesNormalPaint.setTypeface(timeTypeface);
             mHourMinutesNormalPaint.setTextSize(140);
-            mHourMinutesNormalPaint.setColor(colorTimeNormal);
 
             mSecondsPaint = new Paint();
             mSecondsPaint.setTypeface(timeTypeface);
             mSecondsPaint.setTextSize(140 * SECONDS_SIZE_FACTOR);
-            mSecondsPaint.setColor(colorTimeNormal);
 
             mAmPmPaint = new Paint();
             mAmPmPaint.setTypeface(timeTypeface);
             mAmPmPaint.setTextSize(140 * AM_PM_SIZE_FACTOR);
-            mAmPmPaint.setColor(colorAmPmNormal);
 
             mDatePaint = new Paint();
             mDatePaint.setTypeface(dateTypeface);
             mDatePaint.setTextSize(20);
 
+            // Colors
+            updateColors();
             updatePaints();
 
             mIs24HourFormat = DateFormat.is24HourFormat(mService);
+
+            mPreferenceHelper.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+        }
+
+        private void updateColors() {
+            mColorBackgroundNormal = mPreferenceHelper.getColorBackground();
+            mColorBackgroundAmbient = getResources().getColor(R.color.background_ambient);
+            mColorTimeNormal = mPreferenceHelper.getColorHourMinutes();
+            mColorTimeAmbient = getResources().getColor(R.color.time_ambient);
+            mColorDateNormal = mPreferenceHelper.getColorDate();
+            mColorDateAmbient = getResources().getColor(R.color.date_ambient);
+            mColorSecondsNormal = mPreferenceHelper.getColorSeconds();
+            mColorAmPmNormal = mPreferenceHelper.getColorAmPm();
         }
 
         private void updatePaints() {
             boolean ambientMode = isInAmbientMode();
+
+            // Colors
+            mHourMinutesAmbientPaint.setColor(mColorTimeAmbient);
+            mHourMinutesNormalPaint.setColor(mColorTimeNormal);
+            mSecondsPaint.setColor(mColorSecondsNormal);
+            mAmPmPaint.setColor(mColorAmPmNormal);
+
             if (ambientMode) {
                 // Ambient mode: we maximize contrast
                 mBackgroundPaint.setColor(mColorBackgroundAmbient);
@@ -304,6 +333,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(0);
+            mPreferenceHelper.unregisterOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
             super.onDestroy();
         }
 

@@ -24,6 +24,8 @@
  */
 package org.jraf.android.simplewatchface.wear.widget;
 
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.content.Context;
 import android.graphics.drawable.GradientDrawable;
 import android.support.wearable.view.WearableListView;
@@ -35,8 +37,22 @@ import android.widget.TextView;
 import org.jraf.android.simplewatchface.R;
 
 public class WearableListItemLayout extends LinearLayout implements WearableListView.OnCenterProximityListener {
+    private static final long ANIMATION_DURATION_MS = 150;
+    private static final float SCALE_SHRINK = .75f;
+    private static final float ALPHA_SHRINK = .5f;
+
     private ImageView mImgColorIndicator;
     private TextView mTxtLabel;
+
+    private ObjectAnimator mExpandColorIndicatorScaleXAnimator;
+    private ObjectAnimator mExpandColorIndicatorScaleYAnimator;
+    private ObjectAnimator mExpandColorIndicatorAlphaAnimator;
+    private AnimatorSet mExpandAnimator;
+
+    private ObjectAnimator mShrinkColorIndicatorScaleXAnimator;
+    private ObjectAnimator mShrinkColorIndicatorScaleYAnimator;
+    private ObjectAnimator mShrinkColorIndicatorAlphaAnimator;
+    private AnimatorSet mShrinkAnimator;
 
     public WearableListItemLayout(Context context) {
         super(context);
@@ -58,6 +74,21 @@ public class WearableListItemLayout extends LinearLayout implements WearableList
     protected void onFinishInflate() {
         mImgColorIndicator = (ImageView) findViewById(R.id.imgColorIndicator);
         mTxtLabel = (TextView) findViewById(R.id.txtLabel);
+
+        mExpandColorIndicatorScaleXAnimator = ObjectAnimator.ofFloat(mImgColorIndicator, "scaleX", SCALE_SHRINK, 1f);
+        mExpandColorIndicatorScaleYAnimator = ObjectAnimator.ofFloat(mImgColorIndicator, "scaleY", SCALE_SHRINK, 1f);
+        mExpandColorIndicatorAlphaAnimator = ObjectAnimator.ofFloat(mTxtLabel, "alpha", ALPHA_SHRINK, 1f);
+        mExpandAnimator = new AnimatorSet();
+        mExpandAnimator.playTogether(mExpandColorIndicatorScaleXAnimator, mExpandColorIndicatorScaleYAnimator, mExpandColorIndicatorAlphaAnimator);
+        mExpandAnimator.setDuration(ANIMATION_DURATION_MS);
+
+        mShrinkColorIndicatorScaleXAnimator = ObjectAnimator.ofFloat(mImgColorIndicator, "scaleX", 1f, SCALE_SHRINK);
+        mShrinkColorIndicatorScaleYAnimator = ObjectAnimator.ofFloat(mImgColorIndicator, "scaleY", 1f, SCALE_SHRINK);
+        mShrinkColorIndicatorAlphaAnimator = ObjectAnimator.ofFloat(mTxtLabel, "alpha", 1f, ALPHA_SHRINK);
+        mShrinkAnimator = new AnimatorSet();
+        mShrinkAnimator.playTogether(mShrinkColorIndicatorScaleXAnimator, mShrinkColorIndicatorScaleYAnimator, mShrinkColorIndicatorAlphaAnimator);
+        mShrinkAnimator.setDuration(ANIMATION_DURATION_MS);
+
         super.onFinishInflate();
     }
 
@@ -66,27 +97,43 @@ public class WearableListItemLayout extends LinearLayout implements WearableList
     }
 
     public void setColorIndicator(int color) {
-        GradientDrawable drawable = (GradientDrawable) mImgColorIndicator.getBackground().mutate();
+        GradientDrawable drawable = (GradientDrawable) mImgColorIndicator.getDrawable().mutate();
         drawable.setColor(color);
     }
 
     @Override
     public void onCenterPosition(boolean animate) {
         if (animate) {
-            animate().scaleX(1f).scaleY(1f);
+            mShrinkAnimator.cancel();
+            if (!mExpandAnimator.isRunning()) {
+                mExpandColorIndicatorScaleXAnimator.setFloatValues(mImgColorIndicator.getScaleX(), 1f);
+                mExpandColorIndicatorScaleYAnimator.setFloatValues(mImgColorIndicator.getScaleY(), 1f);
+                mExpandColorIndicatorAlphaAnimator.setFloatValues(mTxtLabel.getAlpha(), 1f);
+                mExpandAnimator.start();
+            }
         } else {
-            setScaleX(1f);
-            setScaleY(1f);
+            mExpandAnimator.cancel();
+            mImgColorIndicator.setScaleX(1f);
+            mImgColorIndicator.setScaleY(1f);
+            mTxtLabel.setAlpha(1f);
         }
     }
 
     @Override
     public void onNonCenterPosition(boolean animate) {
         if (animate) {
-            animate().scaleX(.8f).scaleY(.8f);
+            mExpandAnimator.cancel();
+            if (!mShrinkAnimator.isRunning()) {
+                mShrinkColorIndicatorScaleXAnimator.setFloatValues(mImgColorIndicator.getScaleX(), SCALE_SHRINK);
+                mShrinkColorIndicatorScaleYAnimator.setFloatValues(mImgColorIndicator.getScaleY(), SCALE_SHRINK);
+                mShrinkColorIndicatorAlphaAnimator.setFloatValues(mTxtLabel.getAlpha(), ALPHA_SHRINK);
+                mShrinkAnimator.start();
+            }
         } else {
-            setScaleX(.8f);
-            setScaleY(.8f);
+            mShrinkAnimator.cancel();
+            mImgColorIndicator.setScaleX(SCALE_SHRINK);
+            mImgColorIndicator.setScaleY(SCALE_SHRINK);
+            mTxtLabel.setAlpha(ALPHA_SHRINK);
         }
     }
 }

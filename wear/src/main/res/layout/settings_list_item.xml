@@ -27,12 +27,14 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="?android:attr/listPreferredItemHeight">
+    android:layout_height="?android:attr/listPreferredItemHeight"
+    android:orientation="horizontal"
+    android:padding="8dp">
 
     <ImageView
         android:id="@+id/imgColorIndicator"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/settings_list_item_color_indicator"
         tools:ignore="ContentDescription" />
@@ -41,6 +43,9 @@
         android:id="@+id/txtLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical" />
+        android:textAppearance="?android:textAppearanceMedium"
+        android:layout_gravity="center_vertical"
+        android:layout_marginLeft="8dp"
+        tools:text="@string/settings_colors_background" />
 
 </org.jraf.android.simplewatchface.wear.widget.WearableListItemLayout>
