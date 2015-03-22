@@ -24,6 +24,7 @@
   -->
 <resources>
     <string-array name="settings_colors">
+        <item>@string/settings_colors_presets</item>
         <item>@string/settings_colors_background</item>
         <item>@string/settings_colors_hourMinutes</item>
         <item>@string/settings_colors_seconds</item>

@@ -34,6 +34,10 @@ android {
             signingConfig signingConfigs.release
         }
     }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
 }
 
 dependencies {
@@ -41,5 +45,6 @@ dependencies {
     compile 'com.google.android.support:wearable:1.1.0'
     compile 'com.google.android.gms:play-services-wearable:6.5.87'
     compile 'org.jraf:jraf-android-util:1.0.0'
-    compile 'org.jraf:android-wear-color-picker:1.0.0'
+    compile 'org.jraf:android-wear-color-picker:1.0.1'
+    compile 'com.jakewharton:butterknife:6.1.0'
 }
