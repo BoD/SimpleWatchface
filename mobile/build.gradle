@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
-    buildToolsVersion "21.1.2"
+    compileSdkVersion 22
+    buildToolsVersion '22.0.0'
 
     defaultConfig {
-        applicationId "org.jraf.android.simplewatchface"
-        minSdkVersion 19
-        targetSdkVersion 21
+        applicationId 'org.jraf.android.simplewatchface'
+        minSdkVersion 18
+        targetSdkVersion 22
         versionCode buildNumber
         versionName buildProperties['versionName']
         resConfigs "en", "fr"
@@ -38,14 +38,17 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     wearApp project(':wear')
-    compile 'com.google.android.gms:play-services:+'
+    compile 'com.google.android.gms:play-services:7.0.0'
+    compile 'com.soundcloud.android:android-crop:0.9.10@aar'
+    compile 'org.jraf:jraf-android-util:1.0.0'
+    compile project(':common')
 }
 
-task deploy(dependsOn: assembleRelease) << {
-    description 'Build a release apk, copy the result to the deploy and \'etc\' folders, then increment the build number.'
-
+//noinspection GroovyAssignabilityCheck
+task deploy(
+        description: 'Build a release apk, copy the result to the deploy and \'etc\' folders, then increment the build number.',
+        dependsOn: assembleRelease) << {
     // Copy the apk to the 'etc' folder
     new File('etc/apk').mkdirs()
     copy {

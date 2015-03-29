@@ -24,10 +24,12 @@
  */
 package org.jraf.android.simplewatchface.wear.app.watchface;
 
-import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
@@ -41,7 +43,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
-import org.jraf.android.simplewatchface.wear.app.settings.PreferenceHelper;
+import org.jraf.android.simplewatchface.wear.app.settings.SettingsHelper;
 import org.jraf.android.util.log.wrapper.Log;
 
 import java.text.SimpleDateFormat;
@@ -101,8 +103,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private int mColorTimeAmbient;
         private int mColorSecondsNormal;
         private int mColorAmPmNormal;
+        private Bitmap mBackgroundPicture;
 
-        private PreferenceHelper mPreferenceHelper;
+        private SettingsHelper mPreferenceHelper;
 
         private Paint mBackgroundPaint;
         private Paint mHourMinutesAmbientPaint;
@@ -136,12 +139,13 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             }
         };
 
-        private SharedPreferences.OnSharedPreferenceChangeListener mOnSharedPreferenceChangeListener =
-                new SharedPreferences.OnSharedPreferenceChangeListener() {
+        private SettingsHelper.SettingsChangeListener mSettingsChangeListener =
+                new SettingsHelper.SettingsChangeListener() {
                     @Override
-                    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                    public void onSettingsChanged() {
                         updateColors();
                         updatePaints();
+                        mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
                     }
                 };
 
@@ -168,7 +172,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             builder.setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR);
             setWatchFaceStyle(builder.build());
 
-            mPreferenceHelper = PreferenceHelper.get(SimpleWatchFaceService.this);
+            mPreferenceHelper = SettingsHelper.get(SimpleWatchFaceService.this);
 
             // Typefaces
             Typeface timeTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-ExtraBoldItalic.ttf");
@@ -208,7 +212,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
             mIs24HourFormat = DateFormat.is24HourFormat(mService);
 
-            mPreferenceHelper.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+            mPreferenceHelper.addSettingsChangeListener(mSettingsChangeListener);
+            mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
         }
 
         private void updateColors() {
@@ -333,7 +338,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(0);
-            mPreferenceHelper.unregisterOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+            mPreferenceHelper.removeSettingsChangeListener(mSettingsChangeListener);
             super.onDestroy();
         }
 
@@ -393,9 +398,6 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             int canvasWidth = bounds.width();
             int canvasHeight = bounds.height();
 
-            // Background
-            canvas.drawRect(0, 0, canvasWidth - 1, canvasHeight - 1, mBackgroundPaint);
-
             Rect peekCardPosition = getPeekCardPosition();
             int peekCardTop;
             if (peekCardPosition.height() == 0) {
@@ -406,8 +408,21 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             }
 
             if (isInAmbientMode()) {
+                // Background
+                canvas.drawRect(0, 0, canvasWidth - 1, canvasHeight - 1, mBackgroundPaint);
+
                 onDrawAmbient(canvas, canvasWidth, canvasHeight, peekCardTop);
             } else {
+                // Background
+                if (mBackgroundPicture == null) {
+                    canvas.drawRect(0, 0, canvasWidth - 1, canvasHeight - 1, mBackgroundPaint);
+                } else {
+                    Matrix matrix = new Matrix();
+                    RectF src = new RectF(0, 0, mBackgroundPicture.getWidth(), mBackgroundPicture.getHeight());
+                    matrix.setRectToRect(src, new RectF(bounds), Matrix.ScaleToFit.CENTER);
+                    canvas.drawBitmap(mBackgroundPicture, matrix, mBackgroundPaint);
+                }
+
                 onDrawNormal(canvas, canvasWidth, canvasHeight, peekCardTop);
             }
         }

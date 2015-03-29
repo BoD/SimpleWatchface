@@ -23,9 +23,10 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
-
-    <style name="Theme.NoSwipeToDismiss" parent="@android:style/Theme.DeviceDefault">
-        <item name="android:windowSwipeToDismiss">false</item>
-    </style>
-</resources>
+<ColorPreset>
+    <color name="background">#1A2530</color>
+    <color name="hourMinutes">#E74C3C</color>
+    <color name="seconds">#34495E</color>
+    <color name="amPm">#2C3E50</color>
+    <color name="date">#ffffff</color>
+</ColorPreset>

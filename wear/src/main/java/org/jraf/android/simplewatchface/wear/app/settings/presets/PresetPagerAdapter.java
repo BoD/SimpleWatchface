@@ -45,7 +45,18 @@ public class PresetPagerAdapter extends PagerAdapter {
         mContext = context;
         try {
             mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_arctic_blue));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_nounours));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_1));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_2));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_3));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_4));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_5));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_6));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_7));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_1));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_2));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_3));
+            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_4));
+
         } catch (Exception e) {
             // Should never happen
             throw new AssertionError(e);
@@ -90,6 +101,11 @@ public class PresetPagerAdapter extends PagerAdapter {
     @Override
     public boolean isViewFromObject(View view, Object object) {
         return view == object;
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {
+        container.removeView((View) object);
     }
 
     public ColorPreset getColorPreset(int index) {

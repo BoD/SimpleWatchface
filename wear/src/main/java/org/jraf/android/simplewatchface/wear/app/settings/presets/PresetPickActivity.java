@@ -31,6 +31,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.view.WatchViewStub;
 
 import org.jraf.android.simplewatchface.R;
@@ -101,6 +102,15 @@ public class PresetPickActivity extends Activity {
         ColorPreset colorPreset = mAdapter.getColorPreset(currentIndex);
         result.putExtra(EXTRA_RESULT, colorPreset);
         setResult(RESULT_OK, result);
+
+        showConfirmAnimation();
+
         finish();
+    }
+
+    private void showConfirmAnimation() {
+        Intent intent = new Intent(this, ConfirmationActivity.class);
+        intent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION);
+        startActivity(intent);
     }
 }

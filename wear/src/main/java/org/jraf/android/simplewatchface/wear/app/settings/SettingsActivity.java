@@ -58,7 +58,7 @@ public class SettingsActivity extends Activity implements WearableListView.Click
     private int[] getColorsFromPreferences() {
         if (mColorsFromPreferences == null) {
             mColorsFromPreferences = new int[6];
-            PreferenceHelper preferenceHelper = PreferenceHelper.get(this);
+            SettingsHelper preferenceHelper = SettingsHelper.get(this);
             // Special case: the first item is "presets"
             mColorsFromPreferences[0] = getResources().getColor(R.color.settings_color_presets);
             // Normal cases
@@ -72,7 +72,7 @@ public class SettingsActivity extends Activity implements WearableListView.Click
     }
 
     private void saveColorToPreferences(int itemPostion, int pickedColor) {
-        PreferenceHelper preferenceHelper = PreferenceHelper.get(this);
+        SettingsHelper preferenceHelper = SettingsHelper.get(this);
 
         switch (itemPostion) {
             case 1:
@@ -94,7 +94,7 @@ public class SettingsActivity extends Activity implements WearableListView.Click
     }
 
     private void saveColorPresetToPreferences(ColorPreset colorPreset) {
-        PreferenceHelper preferenceHelper = PreferenceHelper.get(this);
+        SettingsHelper preferenceHelper = SettingsHelper.get(this);
         preferenceHelper.setColorBackground(colorPreset.background);
         preferenceHelper.setColorHourMinutes(colorPreset.hourMinutes);
         preferenceHelper.setColorSeconds(colorPreset.seconds);

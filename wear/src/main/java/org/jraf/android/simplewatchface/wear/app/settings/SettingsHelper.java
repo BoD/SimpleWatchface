@@ -27,35 +27,61 @@ package org.jraf.android.simplewatchface.wear.app.settings;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
+import android.support.annotation.Nullable;
 
 import org.jraf.android.simplewatchface.R;
+import org.jraf.android.util.bitmap.BitmapUtil;
+import org.jraf.android.util.listeners.Listeners;
+import org.jraf.android.util.log.wrapper.Log;
 
-public class PreferenceHelper {
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+public class SettingsHelper {
     private static final String PREF_COLOR_BACKGROUND = "PREF_COLOR_BACKGROUND";
     private static final String PREF_COLOR_HOUR_MINUTES = "PREF_COLOR_HOUR_MINUTES";
     private static final String PREF_COLOR_SECONDS = "PREF_COLOR_SECONDS";
     private static final String PREF_COLOR_AM_PM = "PREF_COLOR_AM_PM";
     private static final String PREF_COLOR_DATE = "PREF_COLOR_DATE";
 
-    private static final PreferenceHelper INSTANCE = new PreferenceHelper();
+    private static final SettingsHelper INSTANCE = new SettingsHelper();
+    private static final String FILE_BACKGROUND_PICTURE = "background.jpg";
 
+    private boolean mIsInit;
+    private Context mContext;
     private SharedPreferences mSharedPreference;
+
     private int mDefaultColorBackground;
     private int mDefaultColorHourMinutes;
     private int mDefaultColorSeconds;
     private int mDefaultColorAmPm;
     private int mDefaultColorDate;
 
-    public static PreferenceHelper get(Context context) {
-        if (INSTANCE.mSharedPreference == null) {
-            INSTANCE.mSharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
-            INSTANCE.initDefaults(context);
+    private Bitmap mBackgroundPicture;
+
+    private SettingsHelper() {}
+
+    public static SettingsHelper get(Context context) {
+        if (!INSTANCE.mIsInit) {
+            INSTANCE.init(context);
         }
         return INSTANCE;
     }
 
-    private PreferenceHelper() {}
+    private void init(Context context) {
+        mContext = context.getApplicationContext();
+        mSharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
+        initDefaults(context);
+        File backgroundBitmapFile = context.getFileStreamPath(FILE_BACKGROUND_PICTURE);
+        if (backgroundBitmapFile.exists()) {
+            mBackgroundPicture = BitmapUtil.tryDecodeFile(backgroundBitmapFile, null);
+            if (mBackgroundPicture == null) Log.w("Could not open background bitmap");
+        }
+    }
 
     private void initDefaults(Context context) {
         Resources resources = context.getResources();
@@ -106,12 +132,71 @@ public class PreferenceHelper {
         mSharedPreference.edit().putInt(PREF_COLOR_DATE, color).apply();
     }
 
-
-    public void registerOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        mSharedPreference.registerOnSharedPreferenceChangeListener(listener);
+    public Bitmap getBackgroundPicture() {
+        return mBackgroundPicture;
     }
 
-    public void unregisterOnSharedPreferenceChangeListener(SharedPreferences.OnSharedPreferenceChangeListener listener) {
-        mSharedPreference.unregisterOnSharedPreferenceChangeListener(listener);
+    public void setBackgroundPicture(@Nullable byte[] bitmapData) {
+        if (bitmapData == null) {
+            mBackgroundPicture = null;
+            mContext.deleteFile(FILE_BACKGROUND_PICTURE);
+        } else {
+            mBackgroundPicture = BitmapFactory.decodeByteArray(bitmapData, 0, bitmapData.length);
+            try (FileOutputStream fileOutputStream = mContext.openFileOutput(FILE_BACKGROUND_PICTURE, Context.MODE_PRIVATE)) {
+                fileOutputStream.write(bitmapData, 0, bitmapData.length);
+                fileOutputStream.flush();
+            } catch (IOException e) {
+                Log.e("Could not save the bitmap to a file", e);
+            }
+        }
+        dispatchToListeners();
     }
+
+
+    /*
+     * Listeners.
+     */
+    // region
+
+    public static interface SettingsChangeListener {
+        void onSettingsChanged();
+    }
+
+    private Listeners<SettingsChangeListener> mListeners = new Listeners<SettingsChangeListener>() {
+        @Override
+        protected void onFirstListener() {
+            mSharedPreference.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+        }
+
+        @Override
+        protected void onNoMoreListeners() {
+            mSharedPreference.unregisterOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+        }
+    };
+
+    private SharedPreferences.OnSharedPreferenceChangeListener mOnSharedPreferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            dispatchToListeners();
+        }
+    };
+
+    private void dispatchToListeners() {
+        mListeners.dispatch(new Listeners.Dispatcher<SettingsChangeListener>() {
+            @Override
+            public void dispatch(SettingsChangeListener listener) {
+                listener.onSettingsChanged();
+            }
+        });
+    }
+
+    public void addSettingsChangeListener(SettingsChangeListener settingsChangeListener) {
+        mListeners.add(settingsChangeListener);
+    }
+
+    public void removeSettingsChangeListener(SettingsChangeListener settingsChangeListener) {
+        mListeners.remove(settingsChangeListener);
+    }
+
+    // endregion
 }
