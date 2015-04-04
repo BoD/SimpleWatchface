@@ -33,6 +33,6 @@
     <color name="background_ambient">#000</color>
     <color name="time_ambient">#FFF</color>
     <color name="date_ambient">#FFF</color>
-    <color name="settings_color_presets">#888</color>
+    <color name="settings_color_generic">#888</color>
 
 </resources>

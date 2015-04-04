@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings;
+package org.jraf.android.simplewatchface.wear.app.settings.colors;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -31,13 +31,12 @@ import android.support.wearable.view.WearableListView;
 
 import org.jraf.android.androidwearcolorpicker.app.ColorPickActivity;
 import org.jraf.android.simplewatchface.R;
-import org.jraf.android.simplewatchface.wear.app.settings.presets.PresetPickActivity;
-import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
+import org.jraf.android.simplewatchface.wear.app.settings.SettingsAdapter;
+import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 import org.jraf.android.util.log.wrapper.Log;
 
-public class SettingsActivity extends Activity implements WearableListView.ClickListener {
+public class ColorSettingsActivity extends Activity implements WearableListView.ClickListener {
     private static final int REQUEST_PICK_COLOR = 0;
-    private static final int REQUEST_PICK_PRESET = 1;
 
     private int[] mColorsFromPreferences;
     private int mItemPosition;
@@ -48,7 +47,7 @@ public class SettingsActivity extends Activity implements WearableListView.Click
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings);
         WearableListView listView = (WearableListView) findViewById(R.id.list);
-        mAdapter = new SettingsAdapter(this, getColorsFromPreferences());
+        mAdapter = new SettingsAdapter(this, getResources().getStringArray(R.array.settings_colors), getColorsFromPreferences());
         listView.setAdapter(mAdapter);
 
         // Set a click listener
@@ -59,14 +58,11 @@ public class SettingsActivity extends Activity implements WearableListView.Click
         if (mColorsFromPreferences == null) {
             mColorsFromPreferences = new int[6];
             SettingsHelper preferenceHelper = SettingsHelper.get(this);
-            // Special case: the first item is "presets"
-            mColorsFromPreferences[0] = getResources().getColor(R.color.settings_color_presets);
-            // Normal cases
-            mColorsFromPreferences[1] = preferenceHelper.getColorBackground();
-            mColorsFromPreferences[2] = preferenceHelper.getColorHourMinutes();
-            mColorsFromPreferences[3] = preferenceHelper.getColorSeconds();
-            mColorsFromPreferences[4] = preferenceHelper.getColorAmPm();
-            mColorsFromPreferences[5] = preferenceHelper.getColorDate();
+            mColorsFromPreferences[0] = preferenceHelper.getColorBackground();
+            mColorsFromPreferences[1] = preferenceHelper.getColorHourMinutes();
+            mColorsFromPreferences[2] = preferenceHelper.getColorSeconds();
+            mColorsFromPreferences[3] = preferenceHelper.getColorAmPm();
+            mColorsFromPreferences[4] = preferenceHelper.getColorDate();
         }
         return mColorsFromPreferences;
     }
@@ -75,46 +71,33 @@ public class SettingsActivity extends Activity implements WearableListView.Click
         SettingsHelper preferenceHelper = SettingsHelper.get(this);
 
         switch (itemPostion) {
-            case 1:
+            case 0:
                 preferenceHelper.setColorBackground(pickedColor);
+                // Also indicate that we want to use the background color (not the background picture)
+                preferenceHelper.setBackgroundPicture(null);
                 break;
-            case 2:
+            case 1:
                 preferenceHelper.setColorHourMinutes(pickedColor);
                 break;
-            case 3:
+            case 2:
                 preferenceHelper.setColorSeconds(pickedColor);
                 break;
-            case 4:
+            case 3:
                 preferenceHelper.setColorAmPm(pickedColor);
                 break;
-            case 5:
+            case 4:
                 preferenceHelper.setColorDate(pickedColor);
                 break;
         }
-    }
-
-    private void saveColorPresetToPreferences(ColorPreset colorPreset) {
-        SettingsHelper preferenceHelper = SettingsHelper.get(this);
-        preferenceHelper.setColorBackground(colorPreset.background);
-        preferenceHelper.setColorHourMinutes(colorPreset.hourMinutes);
-        preferenceHelper.setColorSeconds(colorPreset.seconds);
-        preferenceHelper.setColorAmPm(colorPreset.amPm);
-        preferenceHelper.setColorDate(colorPreset.date);
     }
 
     @Override
     public void onClick(WearableListView.ViewHolder viewHolder) {
         SettingsAdapter.ItemViewHolder itemViewHolder = (SettingsAdapter.ItemViewHolder) viewHolder;
         mItemPosition = itemViewHolder.position;
-        if (mItemPosition == 0) {
-            // Special case: the first item is "presets"
-            Intent intent = new Intent(this, PresetPickActivity.class);
-            startActivityForResult(intent, REQUEST_PICK_PRESET);
-        } else {
-            int oldColor = getColorsFromPreferences()[itemViewHolder.position];
-            Intent intent = new ColorPickActivity.IntentBuilder().oldColor(oldColor).build(this);
-            startActivityForResult(intent, REQUEST_PICK_COLOR);
-        }
+        int oldColor = getColorsFromPreferences()[itemViewHolder.position];
+        Intent intent = new ColorPickActivity.IntentBuilder().oldColor(oldColor).build(this);
+        startActivityForResult(intent, REQUEST_PICK_COLOR);
     }
 
     @Override
@@ -124,17 +107,6 @@ public class SettingsActivity extends Activity implements WearableListView.Click
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
-            case REQUEST_PICK_PRESET:
-                if (resultCode == RESULT_CANCELED) {
-                    // The user pressed 'Cancel'
-                    break;
-                }
-                ColorPreset colorPreset = data.getParcelableExtra(PresetPickActivity.EXTRA_RESULT);
-                saveColorPresetToPreferences(colorPreset);
-                mColorsFromPreferences = null;
-                mAdapter.setColors(getColorsFromPreferences());
-                break;
-
             case REQUEST_PICK_COLOR:
                 if (resultCode == RESULT_CANCELED) {
                     // The user pressed 'Cancel'

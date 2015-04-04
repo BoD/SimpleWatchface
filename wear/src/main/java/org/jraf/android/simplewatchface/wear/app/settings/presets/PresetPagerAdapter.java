@@ -25,8 +25,11 @@
 package org.jraf.android.simplewatchface.wear.app.settings.presets;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.view.PagerAdapter;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,6 +37,7 @@ import android.widget.TextView;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
+import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 
 import java.util.ArrayList;
 
@@ -77,6 +81,9 @@ public class PresetPagerAdapter extends PagerAdapter {
         TextView txtAmPm = (TextView) res.findViewById(R.id.txtAmPm);
         TextView txtDate = (TextView) res.findViewById(R.id.txtDate);
 
+        boolean is24HourFormat = DateFormat.is24HourFormat(mContext);
+        if (is24HourFormat) txtAmPm.setVisibility(View.INVISIBLE);
+
         // Typefaces
         Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/Exo2-ExtraBoldItalic.ttf");
         txtHourMinutes.setTypeface(timeTypeface);
@@ -87,7 +94,13 @@ public class PresetPagerAdapter extends PagerAdapter {
 
         // Colors
         ColorPreset colorPreset = mColorPresetList.get(position);
-        conBackground.setBackgroundColor(colorPreset.background);
+        // Background
+        Bitmap backgroundPicture = SettingsHelper.get(mContext).getBackgroundPicture();
+        if (backgroundPicture != null) {
+            conBackground.setBackground(new BitmapDrawable(mContext.getResources(), backgroundPicture));
+        } else {
+            conBackground.setBackgroundColor(colorPreset.background);
+        }
         txtHourMinutes.setTextColor(colorPreset.hourMinutes);
         txtSeconds.setTextColor(colorPreset.seconds);
         txtAmPm.setTextColor(colorPreset.amPm);

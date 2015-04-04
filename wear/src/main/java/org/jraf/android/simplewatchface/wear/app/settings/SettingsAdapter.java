@@ -25,6 +25,7 @@
 package org.jraf.android.simplewatchface.wear.app.settings;
 
 import android.content.Context;
+import android.support.annotation.Nullable;
 import android.support.wearable.view.WearableListView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,15 +35,13 @@ import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.widget.WearableListItemLayout;
 
 public class SettingsAdapter extends WearableListView.Adapter {
-    private Context mContext;
     private String[] mLabels;
     private int[] mColors;
     private LayoutInflater mInflater;
 
-    public SettingsAdapter(Context context, int[] colors) {
-        mContext = context;
-        mInflater = LayoutInflater.from(mContext);
-        mLabels = mContext.getResources().getStringArray(R.array.settings_colors);
+    public SettingsAdapter(Context context, String[] labels, @Nullable int[] colors) {
+        mInflater = LayoutInflater.from(context);
+        mLabels = labels;
         mColors = colors;
     }
 
@@ -64,11 +63,9 @@ public class SettingsAdapter extends WearableListView.Adapter {
         ItemViewHolder itemHolder = (ItemViewHolder) holder;
         WearableListItemLayout view = (WearableListItemLayout) itemHolder.itemView;
         view.setLabel(mLabels[position]);
-        view.setColorIndicator(mColors[position]);
+        if (mColors != null) view.setColorIndicator(mColors[position]);
 
         itemHolder.position = position;
-
-//        view.onNonCenterPosition(false);
     }
 
     @Override

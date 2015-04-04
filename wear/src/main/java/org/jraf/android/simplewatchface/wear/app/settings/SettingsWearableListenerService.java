@@ -37,6 +37,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import org.jraf.android.simplewatchface.common.wear.WearHelper;
+import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 import org.jraf.android.util.log.LogUtil;
 import org.jraf.android.util.log.wrapper.Log;
 

@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings;
+package org.jraf.android.simplewatchface.wear.settings;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -81,6 +81,7 @@ public class SettingsHelper {
             mBackgroundPicture = BitmapUtil.tryDecodeFile(backgroundBitmapFile, null);
             if (mBackgroundPicture == null) Log.w("Could not open background bitmap");
         }
+        mIsInit = true;
     }
 
     private void initDefaults(Context context) {

@@ -23,8 +23,13 @@
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string-array name="settings">
+        <item>@string/settings_colorPresets</item>
+        <item>@string/settings_colors</item>
+        <item>@string/settings_resetBackgroundImage</item>
+    </string-array>
+
     <string-array name="settings_colors">
-        <item>@string/settings_colors_presets</item>
         <item>@string/settings_colors_background</item>
         <item>@string/settings_colors_hourMinutes</item>
         <item>@string/settings_colors_seconds</item>

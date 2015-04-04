@@ -43,7 +43,7 @@ import android.view.SurfaceHolder;
 import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
-import org.jraf.android.simplewatchface.wear.app.settings.SettingsHelper;
+import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 import org.jraf.android.util.log.wrapper.Log;
 
 import java.text.SimpleDateFormat;
@@ -264,6 +264,17 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             }
             mHourMinutesAmbientPaint.setStyle(style);
             mDatePaint.setStyle(style);
+
+            // Shadows
+            int shadowColor = 0xFF000000; // black
+            int shadowRadiusBig = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_big);
+            int shadowDeltaBig = shadowRadiusBig / 2;
+            int shadowRadiusSmall = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_small);
+            int shadowDeltaSmall = shadowRadiusSmall / 2;
+            mHourMinutesNormalPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
+            mSecondsPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
+            mAmPmPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
+            mDatePaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
         }
 
         @Override

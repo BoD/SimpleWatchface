@@ -42,6 +42,10 @@
             android:id="@+id/txtHourMinutes"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:shadowColor="#000"
+            android:shadowDx="3"
+            android:shadowDy="3"
+            android:shadowRadius="6"
             android:text="4:20"
             android:textSize="72sp" />
 
@@ -55,6 +59,10 @@
                 android:id="@+id/txtAmPm"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:shadowColor="#000"
+                android:shadowDx="3"
+                android:shadowDy="3"
+                android:shadowRadius="6"
                 android:text="PM"
                 android:textSize="24sp" />
 
@@ -62,6 +70,10 @@
                 android:id="@+id/txtSeconds"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:shadowColor="#000"
+                android:shadowDx="3"
+                android:shadowDy="3"
+                android:shadowRadius="6"
                 android:text="42"
                 android:textSize="24sp" />
         </LinearLayout>
@@ -72,6 +84,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="-16dp"
+        android:shadowColor="#000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="4"
         android:text="Sun, Mar 22"
         android:textSize="32sp" />
 </LinearLayout>
