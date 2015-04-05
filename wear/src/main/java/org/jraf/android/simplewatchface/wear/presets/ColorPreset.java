@@ -26,10 +26,13 @@ package org.jraf.android.simplewatchface.wear.presets;
 
 import android.content.Context;
 import android.content.res.XmlResourceParser;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.XmlRes;
+import android.support.v7.graphics.Palette;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -81,6 +84,17 @@ public class ColorPreset implements Parcelable {
         }
         xmlResourceParser.close();
 
+        return res;
+    }
+
+    public static ColorPreset fromImage(@NonNull Bitmap bitmap) {
+        Palette palette = Palette.generate(bitmap);
+        ColorPreset res = new ColorPreset();
+        int white = 0xFFFFFFFF;
+        res.hourMinutes = palette.getVibrantColor(white);
+        res.seconds = palette.getLightVibrantColor(white);
+        res.amPm = palette.getLightVibrantColor(white);
+        res.date = palette.getMutedColor(white);
         return res;
     }
 

@@ -48,6 +48,10 @@ public class PresetPagerAdapter extends PagerAdapter {
     public PresetPagerAdapter(Context context) {
         mContext = context;
         try {
+            Bitmap backgroundPicture = SettingsHelper.get(context).getBackgroundPicture();
+            if (backgroundPicture != null) {
+                mColorPresetList.add(ColorPreset.fromImage(backgroundPicture));
+            }
             mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_arctic_blue));
             mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_1));
             mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_2));

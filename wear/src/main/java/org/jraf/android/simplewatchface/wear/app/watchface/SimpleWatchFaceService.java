@@ -172,7 +172,12 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             builder.setViewProtection(WatchFaceStyle.PROTECT_HOTWORD_INDICATOR | WatchFaceStyle.PROTECT_STATUS_BAR);
             setWatchFaceStyle(builder.build());
 
+            mIs24HourFormat = DateFormat.is24HourFormat(mService);
+
             mPreferenceHelper = SettingsHelper.get(SimpleWatchFaceService.this);
+
+            mPreferenceHelper.addSettingsChangeListener(mSettingsChangeListener);
+            mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
 
             // Typefaces
             Typeface timeTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-ExtraBoldItalic.ttf");
@@ -209,11 +214,6 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             // Colors
             updateColors();
             updatePaints();
-
-            mIs24HourFormat = DateFormat.is24HourFormat(mService);
-
-            mPreferenceHelper.addSettingsChangeListener(mSettingsChangeListener);
-            mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
         }
 
         private void updateColors() {
@@ -242,7 +242,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 mDatePaint.setColor(mColorDateAmbient);
             } else {
                 // Normal mode: colors!
-                mBackgroundPaint.setColor(mColorBackgroundNormal);
+                if (mBackgroundPicture == null) mBackgroundPaint.setColor(mColorBackgroundNormal);
                 mDatePaint.setColor(mColorDateNormal);
             }
 
@@ -268,9 +268,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             // Shadows
             int shadowColor = 0xFF000000; // black
             int shadowRadiusBig = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_big);
-            int shadowDeltaBig = shadowRadiusBig / 2;
+            int shadowDeltaBig = (int) (shadowRadiusBig / 1.5);
             int shadowRadiusSmall = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_small);
-            int shadowDeltaSmall = shadowRadiusSmall / 2;
+            int shadowDeltaSmall = (int) (shadowRadiusSmall / 1.5);
             mHourMinutesNormalPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
             mSecondsPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
             mAmPmPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
@@ -420,13 +420,13 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
             if (isInAmbientMode()) {
                 // Background
-                canvas.drawRect(0, 0, canvasWidth - 1, canvasHeight - 1, mBackgroundPaint);
+                canvas.drawColor(mColorBackgroundAmbient);
 
                 onDrawAmbient(canvas, canvasWidth, canvasHeight, peekCardTop);
             } else {
                 // Background
                 if (mBackgroundPicture == null) {
-                    canvas.drawRect(0, 0, canvasWidth - 1, canvasHeight - 1, mBackgroundPaint);
+                    canvas.drawColor(mColorBackgroundNormal);
                 } else {
                     Matrix matrix = new Matrix();
                     RectF src = new RectF(0, 0, mBackgroundPicture.getWidth(), mBackgroundPicture.getHeight());
