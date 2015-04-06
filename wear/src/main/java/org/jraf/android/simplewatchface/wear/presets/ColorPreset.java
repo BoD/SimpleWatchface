@@ -91,6 +91,7 @@ public class ColorPreset implements Parcelable {
         Palette palette = Palette.generate(bitmap);
         ColorPreset res = new ColorPreset();
         int white = 0xFFFFFFFF;
+        res.background = white;
         res.hourMinutes = palette.getVibrantColor(white);
         res.seconds = palette.getLightVibrantColor(white);
         res.amPm = palette.getLightVibrantColor(white);

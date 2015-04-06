@@ -143,9 +143,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 new SettingsHelper.SettingsChangeListener() {
                     @Override
                     public void onSettingsChanged() {
+                        mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
                         updateColors();
                         updatePaints();
-                        mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
                     }
                 };
 
@@ -242,7 +242,11 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 mDatePaint.setColor(mColorDateAmbient);
             } else {
                 // Normal mode: colors!
-                if (mBackgroundPicture == null) mBackgroundPaint.setColor(mColorBackgroundNormal);
+                if (mBackgroundPicture == null) {
+                    mBackgroundPaint.setColor(mColorBackgroundNormal);
+                } else {
+                    mBackgroundPaint.setColor(0xFFFFFFFF); // white
+                }
                 mDatePaint.setColor(mColorDateNormal);
             }
 
@@ -272,8 +276,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             int shadowRadiusSmall = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_small);
             int shadowDeltaSmall = (int) (shadowRadiusSmall / 1.5);
             mHourMinutesNormalPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
-            mSecondsPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
-            mAmPmPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
+            mSecondsPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
+            mAmPmPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
             mDatePaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
         }
 
