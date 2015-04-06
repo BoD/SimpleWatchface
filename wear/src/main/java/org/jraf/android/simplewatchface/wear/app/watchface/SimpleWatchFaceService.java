@@ -247,7 +247,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             }
 
             // Enable antialias for normal mode / disable it for ambient mode + low bit
-            boolean antialias = !ambientMode || mLowBitAmbient;
+            boolean antialias = !ambientMode || !mLowBitAmbient;
             mHourMinutesAmbientPaint.setAntiAlias(antialias);
             mHourMinutesNormalPaint.setAntiAlias(antialias);
             mSecondsPaint.setAntiAlias(antialias);
