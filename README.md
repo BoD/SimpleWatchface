@@ -1,7 +1,12 @@
 SimpleWatchface
 ===============
 
-A very simple Watchface for Android Wear (using the non public API).
+A very simple Watchface for Android Wear.
+Some features:
+- A big font that fits the whole screen
+- Color presets
+- Configure colors directly on the watch
+- Send a background picture from your phone
 
 Licence
 -------
