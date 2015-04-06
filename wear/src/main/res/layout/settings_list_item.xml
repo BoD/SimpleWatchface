@@ -35,8 +35,8 @@
 
     <ImageView
         android:id="@+id/imgColorIndicator"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/settings_list_item_color_indicator"
         tools:ignore="ContentDescription" />
@@ -45,7 +45,7 @@
         android:id="@+id/txtLabel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:textAppearanceSmall"
+        android:textAppearance="?android:textAppearanceMedium"
         android:layout_gravity="center_vertical"
         android:layout_marginLeft="8dp"
         tools:text="@string/settings_colors_background" />

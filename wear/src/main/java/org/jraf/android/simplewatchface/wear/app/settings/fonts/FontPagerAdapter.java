@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings.presets;
+package org.jraf.android.simplewatchface.wear.app.settings.fonts;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -36,35 +36,21 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import org.jraf.android.simplewatchface.R;
-import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
-public class PresetPagerAdapter extends PagerAdapter {
+public class FontPagerAdapter extends PagerAdapter {
     private final Context mContext;
-    private ArrayList<ColorPreset> mColorPresetList = new ArrayList<>();
+    private final FontPickActivity.Mode mMode;
+    private ArrayList<String> mFontNameList = new ArrayList<>();
 
-    public PresetPagerAdapter(Context context) {
+    public FontPagerAdapter(Context context, FontPickActivity.Mode mode) {
         mContext = context;
+        mMode = mode;
         try {
-            Bitmap backgroundPicture = SettingsHelper.get(context).getBackgroundPicture();
-            if (backgroundPicture != null) {
-                mColorPresetList.add(ColorPreset.fromImage(backgroundPicture));
-            }
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_arctic_blue));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_1));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_2));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_3));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_4));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_5));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_6));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_guillaume_7));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_1));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_2));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_3));
-            mColorPresetList.add(ColorPreset.fromXml(context, R.xml.preset_color_adobe_4));
-
+            mFontNameList.addAll(Arrays.asList(mContext.getAssets().list("fonts")));
         } catch (Exception e) {
             // Should never happen
             throw new AssertionError(e);
@@ -73,7 +59,7 @@ public class PresetPagerAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        return mColorPresetList.size();
+        return mFontNameList.size();
     }
 
     @Override
@@ -88,27 +74,38 @@ public class PresetPagerAdapter extends PagerAdapter {
         boolean is24HourFormat = DateFormat.is24HourFormat(mContext);
         if (is24HourFormat) txtAmPm.setVisibility(View.INVISIBLE);
 
+        SettingsHelper settingsHelper = SettingsHelper.get(mContext);
+
         // Typefaces
-        Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontTime());
-        Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontDate());
+        Typeface timeTypeface;
+        Typeface dateTypeface;
+        if (mMode == FontPickActivity.Mode.TIME) {
+            // Preview the time font
+            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
+            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + settingsHelper.getFontDate());
+        } else {
+            // Preview the date font
+            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + settingsHelper.getFontTime());
+            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
+        }
+
         txtHourMinutes.setTypeface(timeTypeface);
         txtSeconds.setTypeface(timeTypeface);
         txtAmPm.setTypeface(timeTypeface);
         txtDate.setTypeface(dateTypeface);
 
         // Colors
-        ColorPreset colorPreset = mColorPresetList.get(position);
         // Background
-        Bitmap backgroundPicture = SettingsHelper.get(mContext).getBackgroundPicture();
+        Bitmap backgroundPicture = settingsHelper.getBackgroundPicture();
         if (backgroundPicture != null) {
             conBackground.setBackground(new BitmapDrawable(mContext.getResources(), backgroundPicture));
         } else {
-            conBackground.setBackgroundColor(colorPreset.background);
+            conBackground.setBackgroundColor(settingsHelper.getColorBackground());
         }
-        txtHourMinutes.setTextColor(colorPreset.hourMinutes);
-        txtSeconds.setTextColor(colorPreset.seconds);
-        txtAmPm.setTextColor(colorPreset.amPm);
-        txtDate.setTextColor(colorPreset.date);
+        txtHourMinutes.setTextColor(settingsHelper.getColorHourMinutes());
+        txtSeconds.setTextColor(settingsHelper.getColorSeconds());
+        txtAmPm.setTextColor(settingsHelper.getColorAmPm());
+        txtDate.setTextColor(settingsHelper.getColorDate());
 
         container.addView(res);
 
@@ -125,7 +122,7 @@ public class PresetPagerAdapter extends PagerAdapter {
         container.removeView((View) object);
     }
 
-    public ColorPreset getColorPreset(int index) {
-        return mColorPresetList.get(index);
+    public String getFontName(int index) {
+        return mFontNameList.get(index);
     }
 }

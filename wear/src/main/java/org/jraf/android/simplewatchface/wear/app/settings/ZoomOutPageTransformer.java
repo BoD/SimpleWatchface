@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings.presets;
+package org.jraf.android.simplewatchface.wear.app.settings;
 
 import android.support.v4.view.ViewPager;
 import android.view.View;

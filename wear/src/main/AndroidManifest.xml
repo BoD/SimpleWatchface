@@ -74,6 +74,11 @@
             android:label="@string/app_name"
             android:theme="@style/Theme.NoSwipeToDismiss" />
 
+        <!-- Fonts -->
+        <activity
+            android:name=".wear.app.settings.fonts.FontPickActivity"
+            android:label="@string/app_name" />
+
         <!-- Confirmation -->
         <activity
             android:name="android.support.wearable.activity.ConfirmationActivity"

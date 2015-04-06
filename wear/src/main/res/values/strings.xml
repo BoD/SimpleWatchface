@@ -10,8 +10,14 @@
     <string name="settings_colors_seconds">Seconds</string>
     <string name="settings_colors_amPm">AM/PM</string>
     <string name="settings_colors_date">Date</string>
+    <string name="settings_resetBackgroundImage_success">Background picture reset :)</string>
+    <string name="settings_font_time">Time font</string>
+    <string name="settings_font_date">Date font</string>
 
     <string name="action_settings">Settings</string>
-    <string name="settings_resetBackgroundImage_success">Background picture reset :)</string>
+
+    <string name="default_font_time">Exo2-ExtraBoldItalic.ttf</string>
+    <string name="default_font_date">Exo2-Italic.ttf</string>
+
 
 </resources>

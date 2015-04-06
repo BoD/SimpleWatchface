@@ -105,7 +105,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private int mColorAmPmNormal;
         private Bitmap mBackgroundPicture;
 
-        private SettingsHelper mPreferenceHelper;
+        private SettingsHelper mSettingsHelper;
 
         private Paint mBackgroundPaint;
         private Paint mHourMinutesAmbientPaint;
@@ -143,7 +143,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 new SettingsHelper.SettingsChangeListener() {
                     @Override
                     public void onSettingsChanged() {
-                        mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
+                        mBackgroundPicture = mSettingsHelper.getBackgroundPicture();
                         updateColors();
                         updatePaints();
                     }
@@ -174,17 +174,10 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
             mIs24HourFormat = DateFormat.is24HourFormat(mService);
 
-            mPreferenceHelper = SettingsHelper.get(SimpleWatchFaceService.this);
+            mSettingsHelper = SettingsHelper.get(SimpleWatchFaceService.this);
 
-            mPreferenceHelper.addSettingsChangeListener(mSettingsChangeListener);
-            mBackgroundPicture = mPreferenceHelper.getBackgroundPicture();
-
-            // Typefaces
-            Typeface timeTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-ExtraBoldItalic.ttf");
-            Typeface dateTypeface = Typeface.createFromAsset(getAssets(), "fonts/Exo2-Italic.ttf");
-//            Typeface timeTypeface = Typeface.SANS_SERIF;
-//            Typeface dateTypeface = Typeface.SANS_SERIF;
-
+            mSettingsHelper.addSettingsChangeListener(mSettingsChangeListener);
+            mBackgroundPicture = mSettingsHelper.getBackgroundPicture();
 
             // Paints
             mBackgroundPaint = new Paint();
@@ -192,23 +185,18 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint.setStrokeWidth(1);
 
             mHourMinutesAmbientPaint = new Paint();
-            mHourMinutesAmbientPaint.setTypeface(timeTypeface);
             mHourMinutesAmbientPaint.setTextSize(150);
 
             mHourMinutesNormalPaint = new Paint();
-            mHourMinutesNormalPaint.setTypeface(timeTypeface);
             mHourMinutesNormalPaint.setTextSize(140);
 
             mSecondsPaint = new Paint();
-            mSecondsPaint.setTypeface(timeTypeface);
             mSecondsPaint.setTextSize(140 * SECONDS_SIZE_FACTOR);
 
             mAmPmPaint = new Paint();
-            mAmPmPaint.setTypeface(timeTypeface);
             mAmPmPaint.setTextSize(140 * AM_PM_SIZE_FACTOR);
 
             mDatePaint = new Paint();
-            mDatePaint.setTypeface(dateTypeface);
             mDatePaint.setTextSize(20);
 
             // Colors
@@ -217,14 +205,14 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         }
 
         private void updateColors() {
-            mColorBackgroundNormal = mPreferenceHelper.getColorBackground();
+            mColorBackgroundNormal = mSettingsHelper.getColorBackground();
             mColorBackgroundAmbient = getResources().getColor(R.color.background_ambient);
-            mColorTimeNormal = mPreferenceHelper.getColorHourMinutes();
+            mColorTimeNormal = mSettingsHelper.getColorHourMinutes();
             mColorTimeAmbient = getResources().getColor(R.color.time_ambient);
-            mColorDateNormal = mPreferenceHelper.getColorDate();
+            mColorDateNormal = mSettingsHelper.getColorDate();
             mColorDateAmbient = getResources().getColor(R.color.date_ambient);
-            mColorSecondsNormal = mPreferenceHelper.getColorSeconds();
-            mColorAmPmNormal = mPreferenceHelper.getColorAmPm();
+            mColorSecondsNormal = mSettingsHelper.getColorSeconds();
+            mColorAmPmNormal = mSettingsHelper.getColorAmPm();
         }
 
         private void updatePaints() {
@@ -268,6 +256,15 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             }
             mHourMinutesAmbientPaint.setStyle(style);
             mDatePaint.setStyle(style);
+
+            // Typefaces
+            Typeface timeTypeface = Typeface.createFromAsset(getAssets(), "fonts/" + mSettingsHelper.getFontTime());
+            Typeface dateTypeface = Typeface.createFromAsset(getAssets(), "fonts/" + mSettingsHelper.getFontDate());
+            mHourMinutesAmbientPaint.setTypeface(timeTypeface);
+            mHourMinutesNormalPaint.setTypeface(timeTypeface);
+            mSecondsPaint.setTypeface(timeTypeface);
+            mAmPmPaint.setTypeface(timeTypeface);
+            mDatePaint.setTypeface(dateTypeface);
 
             // Shadows
             int shadowColor = 0xFF000000; // black
@@ -353,7 +350,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         @Override
         public void onDestroy() {
             mUpdateTimeHandler.removeMessages(0);
-            mPreferenceHelper.removeSettingsChangeListener(mSettingsChangeListener);
+            mSettingsHelper.removeSettingsChangeListener(mSettingsChangeListener);
             super.onDestroy();
         }
 

@@ -47,6 +47,8 @@ public class SettingsHelper {
     private static final String PREF_COLOR_SECONDS = "PREF_COLOR_SECONDS";
     private static final String PREF_COLOR_AM_PM = "PREF_COLOR_AM_PM";
     private static final String PREF_COLOR_DATE = "PREF_COLOR_DATE";
+    private static final String PREF_FONT_TIME = "PREF_FONT_TIME";
+    private static final String PREF_FONT_DATE = "PREF_FONT_DATE";
 
     private static final SettingsHelper INSTANCE = new SettingsHelper();
     private static final String FILE_BACKGROUND_PICTURE = "background.jpg";
@@ -60,6 +62,8 @@ public class SettingsHelper {
     private int mDefaultColorSeconds;
     private int mDefaultColorAmPm;
     private int mDefaultColorDate;
+    private String mDefaultFontTime;
+    private String mDefaultFontDate;
 
     private Bitmap mBackgroundPicture;
 
@@ -91,6 +95,8 @@ public class SettingsHelper {
         mDefaultColorSeconds = resources.getColor(R.color.default_seconds);
         mDefaultColorAmPm = resources.getColor(R.color.default_amPm);
         mDefaultColorDate = resources.getColor(R.color.default_date);
+        mDefaultFontTime=resources.getString(R.string.default_font_time);
+        mDefaultFontDate = resources.getString(R.string.default_font_date);
     }
 
     public int getColorBackground() {
@@ -132,6 +138,23 @@ public class SettingsHelper {
     public void setColorDate(int color) {
         mSharedPreference.edit().putInt(PREF_COLOR_DATE, color).apply();
     }
+
+    public String getFontTime() {
+        return mSharedPreference.getString(PREF_FONT_TIME, mDefaultFontTime);
+    }
+
+    public void setFontTime(String fontName) {
+        mSharedPreference.edit().putString(PREF_FONT_TIME, fontName).apply();
+    }
+
+    public String getFontDate() {
+        return mSharedPreference.getString(PREF_FONT_DATE, mDefaultFontDate);
+    }
+
+    public void setFontDate(String fontName) {
+        mSharedPreference.edit().putString(PREF_FONT_DATE, fontName).apply();
+    }
+
 
     public Bitmap getBackgroundPicture() {
         return mBackgroundPicture;

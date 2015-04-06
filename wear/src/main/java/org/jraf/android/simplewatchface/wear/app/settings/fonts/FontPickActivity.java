@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings.presets;
+package org.jraf.android.simplewatchface.wear.app.settings.fonts;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -42,24 +42,31 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 
-public class PresetPickActivity extends Activity {
+public class FontPickActivity extends Activity {
+    public static enum Mode {TIME, DATE,}
+
+    public static final String EXTRA_MODE = "EXTRA_MODE";
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
     @InjectView(R.id.vpgPresets)
     protected ViewPager mVpgPresets;
 
-    private PresetPagerAdapter mAdapter;
+    private Mode mMode = Mode.TIME;
+    private FontPagerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preset_pick);
+
+        mMode = (Mode) getIntent().getSerializableExtra(EXTRA_MODE);
+
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.viewStub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                ButterKnife.inject(PresetPickActivity.this, stub);
-                mAdapter = new PresetPagerAdapter(PresetPickActivity.this);
+                ButterKnife.inject(FontPickActivity.this, stub);
+                mAdapter = new FontPagerAdapter(FontPickActivity.this, mMode);
                 mVpgPresets.setAdapter(mAdapter);
                 mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
                 mVpgPresets.setPageMargin(0);
@@ -100,8 +107,8 @@ public class PresetPickActivity extends Activity {
     protected void onOkClicked() {
         Intent result = new Intent();
         int currentIndex = mVpgPresets.getCurrentItem();
-        ColorPreset colorPreset = mAdapter.getColorPreset(currentIndex);
-        result.putExtra(EXTRA_RESULT, colorPreset);
+        String fontName = mAdapter.getFontName(currentIndex);
+        result.putExtra(EXTRA_RESULT, fontName);
         setResult(RESULT_OK, result);
 
         showConfirmAnimation();

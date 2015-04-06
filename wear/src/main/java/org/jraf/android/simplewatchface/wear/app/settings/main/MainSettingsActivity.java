@@ -33,12 +33,16 @@ import android.widget.Toast;
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.SettingsAdapter;
 import org.jraf.android.simplewatchface.wear.app.settings.colors.ColorSettingsActivity;
+import org.jraf.android.simplewatchface.wear.app.settings.fonts.FontPickActivity;
 import org.jraf.android.simplewatchface.wear.app.settings.presets.PresetPickActivity;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 
 public class MainSettingsActivity extends Activity implements WearableListView.ClickListener {
     private static final int REQUEST_PICK_PRESET = 0;
+    private static final int REQUEST_PICK_FONT_TIME = 1;
+    private static final int REQUEST_PICK_FONT_DATE = 2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,20 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                 break;
 
             case 2:
+                // Time font
+                intent = new Intent(this, FontPickActivity.class);
+                intent.putExtra(FontPickActivity.EXTRA_MODE, FontPickActivity.Mode.TIME);
+                startActivityForResult(intent, REQUEST_PICK_FONT_TIME);
+                break;
+
+            case 3:
+                // Date font
+                intent = new Intent(this, FontPickActivity.class);
+                intent.putExtra(FontPickActivity.EXTRA_MODE, FontPickActivity.Mode.DATE);
+                startActivityForResult(intent, REQUEST_PICK_FONT_DATE);
+                break;
+
+            case 4:
                 // Reset background image
                 SettingsHelper.get(this).setBackgroundPicture(null);
                 Toast.makeText(this, R.string.settings_resetBackgroundImage_success, Toast.LENGTH_SHORT).show();
@@ -91,15 +109,33 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                 ColorPreset colorPreset = data.getParcelableExtra(PresetPickActivity.EXTRA_RESULT);
                 saveColorPresetToPreferences(colorPreset);
                 break;
+
+            case REQUEST_PICK_FONT_TIME:
+                if (resultCode == RESULT_CANCELED) {
+                    // The user pressed 'Cancel'
+                    break;
+                }
+                String fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
+                SettingsHelper.get(this).setFontTime(fontName);
+                break;
+
+            case REQUEST_PICK_FONT_DATE:
+                if (resultCode == RESULT_CANCELED) {
+                    // The user pressed 'Cancel'
+                    break;
+                }
+                fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
+                SettingsHelper.get(this).setFontDate(fontName);
+                break;
         }
     }
 
     private void saveColorPresetToPreferences(ColorPreset colorPreset) {
-        SettingsHelper preferenceHelper = SettingsHelper.get(this);
-        preferenceHelper.setColorBackground(colorPreset.background);
-        preferenceHelper.setColorHourMinutes(colorPreset.hourMinutes);
-        preferenceHelper.setColorSeconds(colorPreset.seconds);
-        preferenceHelper.setColorAmPm(colorPreset.amPm);
-        preferenceHelper.setColorDate(colorPreset.date);
+        SettingsHelper settingsHelper = SettingsHelper.get(this);
+        settingsHelper.setColorBackground(colorPreset.background);
+        settingsHelper.setColorHourMinutes(colorPreset.hourMinutes);
+        settingsHelper.setColorSeconds(colorPreset.seconds);
+        settingsHelper.setColorAmPm(colorPreset.amPm);
+        settingsHelper.setColorDate(colorPreset.date);
     }
 }
