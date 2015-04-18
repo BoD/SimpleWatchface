@@ -24,6 +24,11 @@
  */
 package org.jraf.android.simplewatchface.wear.app.watchface;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Locale;
+
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -45,11 +50,6 @@ import android.view.WindowInsets;
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 import org.jraf.android.util.log.wrapper.Log;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
 
 public class SimpleWatchFaceService extends CanvasWatchFaceService {
     protected SimpleWatchFaceService mService = this;
@@ -143,6 +143,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 new SettingsHelper.SettingsChangeListener() {
                     @Override
                     public void onSettingsChanged() {
+                        // Reset the size cache because it is no longer valid with a different font
+                        mDateSizeCache.clear();
+
                         mBackgroundPicture = mSettingsHelper.getBackgroundPicture();
                         updateColors();
                         updatePaints();
@@ -566,7 +569,6 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
                 // Adjust the date font size to match the hour / minutes / seconds
                 adjustTextSizeForDate(dateStr, hourMinutesSecondsWidth);
-                Log.d("mDatePaint.getTextSize()=" + mDatePaint.getTextSize());
 
                 // Measure date
                 mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
