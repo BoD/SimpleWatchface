@@ -32,6 +32,7 @@
 
     <color name="background_ambient">#000</color>
     <color name="time_ambient">#FFF</color>
+    <color name="amPm_ambient">#DDD</color>
     <color name="date_ambient">#FFF</color>
     <color name="settings_color_generic">#888</color>
 

@@ -73,22 +73,12 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         /**
          * How small seconds are compared to hour / minutes.
          */
-        private static final float SECONDS_SIZE_FACTOR = .33f;
+        private static final float SECONDS_SIZE_FACTOR = .5f;
 
         /**
          * How small the am/pm indicator is compared to hour / minutes.
          */
-        private static final float AM_PM_SIZE_FACTOR = .26f;
-
-        /**
-         * Number of pixels between hour / minutes and seconds.
-         */
-        private static final int SECONDS_SPACE = 2;
-
-        /**
-         * Number of pixels between time and date.
-         */
-        private static final int DATE_SPACE = 8;
+        private static final float AM_PM_SIZE_FACTOR = .4f;
 
         private boolean mLowBitAmbient;
         private boolean mBurnInProtection;
@@ -103,6 +93,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private int mColorTimeAmbient;
         private int mColorSecondsNormal;
         private int mColorAmPmNormal;
+        private int mColorAmPmAmbient;
         private Bitmap mBackgroundPicture;
 
         private SettingsHelper mSettingsHelper;
@@ -110,8 +101,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private Paint mBackgroundPaint;
         private Paint mHourMinutesAmbientPaint;
         private Paint mHourMinutesNormalPaint;
+        private Paint mAmPmNormalPaint;
+        private Paint mAmPmAmbientPaint;
         private Paint mSecondsPaint;
-        private Paint mAmPmPaint;
         private Paint mDatePaint;
 
         private Time mTime = new Time();
@@ -120,6 +112,10 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 
         private int mCachedDateDay;
         private String mCachedDateStr;
+
+        private int mMarginBorders;
+        private int mMarginSeconds;
+        private int mMarginDate;
 
         private HashMap<String, Integer> mDateSizeCache = new HashMap<>(4);
 
@@ -188,23 +184,33 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint.setStrokeWidth(1);
 
             mHourMinutesAmbientPaint = new Paint();
-            mHourMinutesAmbientPaint.setTextSize(150);
+            int hourMinutesTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_hourMinutes);
+            mHourMinutesAmbientPaint.setTextSize(hourMinutesTextSize);
 
             mHourMinutesNormalPaint = new Paint();
-            mHourMinutesNormalPaint.setTextSize(140);
+            mHourMinutesNormalPaint.setTextSize(hourMinutesTextSize);
 
             mSecondsPaint = new Paint();
-            mSecondsPaint.setTextSize(140 * SECONDS_SIZE_FACTOR);
+            mSecondsPaint.setTextSize(hourMinutesTextSize * SECONDS_SIZE_FACTOR);
 
-            mAmPmPaint = new Paint();
-            mAmPmPaint.setTextSize(140 * AM_PM_SIZE_FACTOR);
+            mAmPmAmbientPaint = new Paint();
+            mAmPmAmbientPaint.setTextSize(hourMinutesTextSize * AM_PM_SIZE_FACTOR);
+
+            mAmPmNormalPaint = new Paint();
+            mAmPmNormalPaint.setTextSize(hourMinutesTextSize * AM_PM_SIZE_FACTOR);
 
             mDatePaint = new Paint();
-            mDatePaint.setTextSize(20);
+            int dateTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_date);
+            mDatePaint.setTextSize(dateTextSize);
 
             // Colors
             updateColors();
             updatePaints();
+
+            // Margins
+            mMarginBorders = getResources().getDimensionPixelOffset(R.dimen.wf_margin_borders);
+            mMarginSeconds = getResources().getDimensionPixelOffset(R.dimen.wf_margin_seconds);
+            mMarginDate = getResources().getDimensionPixelOffset(R.dimen.wf_margin_date);
         }
 
         private void updateColors() {
@@ -216,6 +222,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mColorDateAmbient = getResources().getColor(R.color.date_ambient);
             mColorSecondsNormal = mSettingsHelper.getColorSeconds();
             mColorAmPmNormal = mSettingsHelper.getColorAmPm();
+            mColorAmPmAmbient = getResources().getColor(R.color.amPm_ambient);
         }
 
         private void updatePaints() {
@@ -225,7 +232,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mHourMinutesAmbientPaint.setColor(mColorTimeAmbient);
             mHourMinutesNormalPaint.setColor(mColorTimeNormal);
             mSecondsPaint.setColor(mColorSecondsNormal);
-            mAmPmPaint.setColor(mColorAmPmNormal);
+            mAmPmAmbientPaint.setColor(mColorAmPmAmbient);
+            mAmPmNormalPaint.setColor(mColorAmPmNormal);
 
             if (ambientMode) {
                 // Ambient mode: we maximize contrast
@@ -246,7 +254,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mHourMinutesAmbientPaint.setAntiAlias(antialias);
             mHourMinutesNormalPaint.setAntiAlias(antialias);
             mSecondsPaint.setAntiAlias(antialias);
-            mAmPmPaint.setAntiAlias(antialias);
+            mAmPmAmbientPaint.setAntiAlias(antialias);
+            mAmPmNormalPaint.setAntiAlias(antialias);
             mDatePaint.setAntiAlias(antialias);
 
             // Set an outline for ambient + burn in protection / disable it otherwise
@@ -266,7 +275,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mHourMinutesAmbientPaint.setTypeface(timeTypeface);
             mHourMinutesNormalPaint.setTypeface(timeTypeface);
             mSecondsPaint.setTypeface(timeTypeface);
-            mAmPmPaint.setTypeface(timeTypeface);
+            mAmPmAmbientPaint.setTypeface(timeTypeface);
+            mAmPmNormalPaint.setTypeface(timeTypeface);
             mDatePaint.setTypeface(dateTypeface);
 
             // Shadows
@@ -277,7 +287,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             int shadowDeltaSmall = (int) (shadowRadiusSmall / 1.5);
             mHourMinutesNormalPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
             mSecondsPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
-            mAmPmPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
+            mAmPmNormalPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
             mDatePaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
         }
 
@@ -413,20 +423,11 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             int canvasWidth = bounds.width();
             int canvasHeight = bounds.height();
 
-            Rect peekCardPosition = getPeekCardPosition();
-            int peekCardTop;
-            if (peekCardPosition.height() == 0) {
-                // No peek card
-                peekCardTop = canvasHeight;
-            } else {
-                peekCardTop = peekCardPosition.top;
-            }
-
             if (isInAmbientMode()) {
                 // Background
                 canvas.drawColor(mColorBackgroundAmbient);
 
-                onDrawAmbient(canvas, canvasWidth, canvasHeight, peekCardTop);
+                onDrawAmbient(canvas, canvasWidth, canvasHeight);
             } else {
                 // Background
                 if (mBackgroundPicture == null) {
@@ -438,96 +439,67 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                     canvas.drawBitmap(mBackgroundPicture, matrix, mBackgroundPaint);
                 }
 
-                onDrawNormal(canvas, canvasWidth, canvasHeight, peekCardTop);
+                onDrawNormal(canvas, canvasWidth, canvasHeight);
             }
         }
 
-        private void onDrawAmbient(Canvas canvas, int canvasWidth, int canvasHeight, int peekCardTop) {
+        private void onDrawAmbient(Canvas canvas, int canvasWidth, int canvasHeight) {
             String hourMinutesStr = getHourMinutes();
             String dateStr = getDate();
 
-            // Find the biggest possible font size that fits
-            int step = 4;
-            boolean wasNarrower = false;
-            boolean firstTime = true;
+            // Measure hour / minutes
             Rect hourMinutesBounds = new Rect();
-            int hourMinutesWidth;
-            int hourMinutesHeight;
+            mHourMinutesAmbientPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
+            int hourMinutesWidth = hourMinutesBounds.right;
+
+            // Measure date
             Rect dateBounds = new Rect();
-            int dateWidth;
-            int dateHeight;
+            mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
+            int dateWidth = dateBounds.right;
+
             int top;
-            while (true) {
-                // Measure hour / minutes
-                mHourMinutesAmbientPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-                hourMinutesWidth = hourMinutesBounds.right;
-                hourMinutesHeight = hourMinutesBounds.height();
+            int hourMinutesX;
+            int dateX;
+            if (mIsRound) {
+                // Top depends on width
+                int topForWidth = getTopForWidth(canvasWidth, hourMinutesWidth);
+                top = Math.max(mMarginBorders, topForWidth);
 
-                // Adjust the date font size to match the hour / minutes
-                adjustTextSizeForDate(dateStr, hourMinutesWidth);
+                // Horizontally centered
+                hourMinutesX = (canvasWidth - hourMinutesWidth) / 2;
+                dateX = (canvasWidth - dateWidth) / 2;
+            } else {
+                // Top is always the border margin
+                top = mMarginBorders;
 
-                // Measure date
-                mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
-                dateWidth = dateBounds.right;
-                dateHeight = dateBounds.height();
-
-                int totalHeight = hourMinutesHeight + DATE_SPACE + dateHeight;
-                top = (peekCardTop - totalHeight) / 2;
-
-                int availableWidth = getAvailableWidthForTop(canvasWidth, top);
-
-                if (hourMinutesWidth == availableWidth) {
-                    // Perfect fit: stop here
-                    break;
-                } else if (hourMinutesWidth < availableWidth) {
-                    // Narrower
-                    if (firstTime || wasNarrower) {
-                        // Was already narrower, try a bigger font
-                        mHourMinutesAmbientPaint.setTextSize(mHourMinutesAmbientPaint.getTextSize() + step);
-                    } else {
-                        // Went from wider to narrower: we found the best fit: stop here
-                        break;
-                    }
-
-                    wasNarrower = true;
-                } else {
-                    // Wider
-                    if (firstTime || !wasNarrower) {
-                        // Was already wider, try a smaller font
-                        mHourMinutesAmbientPaint.setTextSize(mHourMinutesAmbientPaint.getTextSize() - step);
-                    } else {
-                        // Went from narrower to wider: we went too far: go back to the previous font size and stop here
-                        mHourMinutesAmbientPaint.setTextSize(mHourMinutesAmbientPaint.getTextSize() - step);
-
-                        // Measure hour / minutes
-                        mHourMinutesAmbientPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-                        hourMinutesWidth = hourMinutesBounds.right;
-                        hourMinutesHeight = hourMinutesBounds.height();
-
-                        // Adjust the date font size to match the hour / minutes
-                        adjustTextSizeForDate(dateStr, hourMinutesWidth);
-
-                        // Measure date
-                        mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
-                        dateWidth = dateBounds.right;
-                        dateHeight = dateBounds.height();
-                        break;
-                    }
-
-                    wasNarrower = false;
-                }
-                firstTime = false;
+                // Left centered
+                hourMinutesX = -hourMinutesBounds.left + mMarginBorders;
+                dateX = -dateBounds.left + mMarginBorders;
             }
+            int hourMinutesY = -hourMinutesBounds.top + top;
+            int dateY = -dateBounds.top + hourMinutesY + mMarginDate;
 
             // Draw hour / minutes
-            int hourMinutesX = (canvasWidth - hourMinutesWidth) / 2 - hourMinutesBounds.left;
-            int hourMinutesY = top + hourMinutesHeight;
             canvas.drawText(hourMinutesStr, hourMinutesX, hourMinutesY, mHourMinutesAmbientPaint);
 
+            if (!mIs24HourFormat) {
+                String amPm = getAmPm();
+                // Measure AM/PM
+                Rect amPmBounds = new Rect();
+                mAmPmAmbientPaint.getTextBounds(amPm, 0, amPm.length(), amPmBounds);
+                // Draw AM/PM
+                int amPmX = -amPmBounds.left + hourMinutesX + hourMinutesWidth + mMarginSeconds;
+                int amPmY = -amPmBounds.top + top;
+                canvas.drawText(amPm, amPmX, amPmY, mAmPmAmbientPaint);
+            }
+
             // Draw the date
-            int dateX = (canvasWidth - dateWidth) / 2 - dateBounds.left;
-            int dateY = top + hourMinutesHeight + DATE_SPACE + dateHeight;
             canvas.drawText(dateStr, dateX, dateY, mDatePaint);
+        }
+
+        private int getTopForWidth(int diameter, int width) {
+            if (!mIsRound) return 0;
+            return (int) (diameter - Math.sqrt(diameter * diameter - width * width)) / 2;
         }
 
         private int getAvailableWidthForTop(int width, int top) {
@@ -535,123 +507,68 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             return (int) (2 * Math.sqrt(width * top - top * top));
         }
 
-        private void onDrawNormal(Canvas canvas, int canvasWidth, int canvasHeight, int peekCardTop) {
+        private void onDrawNormal(Canvas canvas, int canvasWidth, int canvasHeight) {
             String hourMinutesStr = getHourMinutes();
             String secondsStr = getSeconds();
             String dateStr = getDate();
 
-            // Find the biggest possible font size that fits
-            int step = 4;
-            boolean wasNarrower = false;
-            boolean firstTime = true;
+            // Measure hour / minutes
             Rect hourMinutesBounds = new Rect();
-            int hourMinutesWidth;
-            int hourMinutesHeight;
+            mHourMinutesAmbientPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
+            int hourMinutesWidth = hourMinutesBounds.width();
+
+            // Measure seconds
             Rect secondsBounds = new Rect();
-            int secondsWidth;
-            int hourMinutesSecondsWidth;
+            mSecondsPaint.getTextBounds(WIDEST_SECONDS, 0, WIDEST_SECONDS.length(), secondsBounds);
+
+            // Measure date
             Rect dateBounds = new Rect();
-            int dateWidth;
-            int dateHeight;
+            mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
+            int dateWidth = dateBounds.width();
+
             int top;
-            while (true) {
-                // Measure hour / minutes
-                mHourMinutesNormalPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-                hourMinutesWidth = hourMinutesBounds.right;
-                hourMinutesHeight = hourMinutesBounds.height();
+            int hourMinutesX;
+            int dateX;
+            if (mIsRound) {
+                // Top depends on width
+                int topForWidth = getTopForWidth(canvasWidth, hourMinutesWidth);
+                top = Math.max(mMarginBorders, topForWidth);
 
-                // Measure seconds
-                mSecondsPaint.getTextBounds(WIDEST_SECONDS, 0, WIDEST_SECONDS.length(), secondsBounds);
-                secondsWidth = secondsBounds.right;
+                // Horizontally centered
+                hourMinutesX = (canvasWidth - hourMinutesWidth) / 2;
+                dateX = (canvasWidth - dateWidth) / 2;
+            } else {
+                // Top is always the border margin
+                top = mMarginBorders;
 
-                hourMinutesSecondsWidth = hourMinutesWidth + SECONDS_SPACE + secondsWidth;
-                Log.d("hourMinutesSecondsWidth=" + hourMinutesSecondsWidth);
-
-                // Adjust the date font size to match the hour / minutes / seconds
-                adjustTextSizeForDate(dateStr, hourMinutesSecondsWidth);
-
-                // Measure date
-                mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
-                dateWidth = dateBounds.right;
-                dateHeight = dateBounds.height();
-
-                int totalHeight = hourMinutesHeight + DATE_SPACE + dateHeight;
-                top = (peekCardTop - totalHeight) / 2;
-
-                int availableWidth = getAvailableWidthForTop(canvasWidth, top);
-
-                if (hourMinutesSecondsWidth == availableWidth) {
-                    // Perfect fit: stop here
-                    break;
-                } else if (hourMinutesSecondsWidth < availableWidth) {
-                    // Narrower
-                    if (firstTime || wasNarrower) {
-                        // Was already narrower, try a bigger font
-                        mHourMinutesNormalPaint.setTextSize(mHourMinutesNormalPaint.getTextSize() + step);
-                        adjustSecondsAndAmPmSizes();
-                    } else {
-                        // Went from wider to narrower: we found the best fit: stop here
-                        break;
-                    }
-
-                    wasNarrower = true;
-                } else {
-                    // Wider
-                    if (firstTime || !wasNarrower) {
-                        // Was already wider, try a smaller font
-                        mHourMinutesNormalPaint.setTextSize(mHourMinutesNormalPaint.getTextSize() - step);
-                        adjustSecondsAndAmPmSizes();
-                    } else {
-                        // Went from narrower to wider: we went too far: go back to the previous font size and stop here
-                        mHourMinutesNormalPaint.setTextSize(mHourMinutesNormalPaint.getTextSize() - step);
-                        adjustSecondsAndAmPmSizes();
-
-                        // Measure hour / minutes
-                        mHourMinutesNormalPaint.getTextBounds(hourMinutesStr, 0, hourMinutesStr.length(), hourMinutesBounds);
-                        hourMinutesWidth = hourMinutesBounds.right;
-                        hourMinutesHeight = hourMinutesBounds.height();
-
-                        // Measure seconds
-                        mSecondsPaint.getTextBounds(WIDEST_SECONDS, 0, WIDEST_SECONDS.length(), secondsBounds);
-                        secondsWidth = secondsBounds.right;
-
-                        hourMinutesSecondsWidth = hourMinutesWidth + SECONDS_SPACE + secondsWidth;
-
-                        // Adjust the date font size to match the hour / minutes
-                        adjustTextSizeForDate(dateStr, hourMinutesSecondsWidth);
-
-                        // Measure date
-                        mDatePaint.getTextBounds(dateStr, 0, dateStr.length(), dateBounds);
-                        dateWidth = dateBounds.right;
-                        dateHeight = dateBounds.height();
-                        break;
-                    }
-
-                    wasNarrower = false;
-                }
-                firstTime = false;
+                // Left centered
+                hourMinutesX = -hourMinutesBounds.left + mMarginBorders;
+                dateX = -dateBounds.left + mMarginBorders;
             }
+            int hourMinutesY = -hourMinutesBounds.top + top;
+            int dateY = -dateBounds.top + hourMinutesY + mMarginDate;
 
-            int hourMinutesX = (canvasWidth - hourMinutesSecondsWidth) / 2 - hourMinutesBounds.left;
-            int hourMinutesY = top + hourMinutesHeight;
+            int secondsX = -secondsBounds.left + hourMinutesX + hourMinutesWidth + mMarginSeconds;
+            int secondsY = hourMinutesY;
 
             // Draw hour / minutes
             canvas.drawText(hourMinutesStr, hourMinutesX, hourMinutesY, mHourMinutesNormalPaint);
 
             // Draw seconds
-            int secondsX = hourMinutesX + hourMinutesWidth + SECONDS_SPACE - secondsBounds.left;
-            canvas.drawText(secondsStr, secondsX, hourMinutesY, mSecondsPaint);
+            canvas.drawText(secondsStr, secondsX, secondsY, mSecondsPaint);
 
-            // Draw AM/PM
             if (!mIs24HourFormat) {
                 String amPm = getAmPm();
-                int amPmY = top + secondsBounds.height();
-                canvas.drawText(amPm, secondsX, amPmY, mAmPmPaint);
+                // Measure AM/PM
+                Rect amPmBounds = new Rect();
+                mAmPmNormalPaint.getTextBounds(amPm, 0, amPm.length(), amPmBounds);
+                // Draw AM/PM
+                int amPmX = -amPmBounds.left + hourMinutesX + hourMinutesWidth + mMarginSeconds;
+                int amPmY = -amPmBounds.top + top;
+                canvas.drawText(amPm, amPmX, amPmY, mAmPmNormalPaint);
             }
 
             // Draw the date
-            int dateX = (canvasWidth - dateWidth) / 2 - dateBounds.left;
-            int dateY = top + hourMinutesHeight + DATE_SPACE + dateHeight;
             canvas.drawText(dateStr, dateX, dateY, mDatePaint);
         }
 
@@ -703,7 +620,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private void adjustSecondsAndAmPmSizes() {
             float size = mHourMinutesNormalPaint.getTextSize();
             mSecondsPaint.setTextSize(size * SECONDS_SIZE_FACTOR);
-            mAmPmPaint.setTextSize(size * AM_PM_SIZE_FACTOR);
+            mAmPmNormalPaint.setTextSize(size * AM_PM_SIZE_FACTOR);
         }
 
         // endregion

@@ -26,4 +26,9 @@
     <dimen name="settings_preset_pick_reveal">64dp</dimen>
     <dimen name="wf_shadow_radius_big">3dp</dimen>
     <dimen name="wf_shadow_radius_small">2dp</dimen>
+    <dimen name="wf_size_hourMinutes">42sp</dimen>
+    <dimen name="wf_size_date">28sp</dimen>
+    <dimen name="wf_margin_borders">8dp</dimen>
+    <dimen name="wf_margin_seconds">3dp</dimen>
+    <dimen name="wf_margin_date">4dp</dimen>
 </resources>
