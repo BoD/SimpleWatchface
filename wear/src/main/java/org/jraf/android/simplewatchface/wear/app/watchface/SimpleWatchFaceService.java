@@ -26,7 +26,6 @@ package org.jraf.android.simplewatchface.wear.app.watchface;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Locale;
 
 import android.graphics.Bitmap;
@@ -117,8 +116,6 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private int mMarginSeconds;
         private int mMarginDate;
 
-        private HashMap<String, Integer> mDateSizeCache = new HashMap<>(4);
-
         /**
          * Handler to update the time periodically in interactive mode.
          */
@@ -139,9 +136,6 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 new SettingsHelper.SettingsChangeListener() {
                     @Override
                     public void onSettingsChanged() {
-                        // Reset the size cache because it is no longer valid with a different font
-                        mDateSizeCache.clear();
-
                         mBackgroundPicture = mSettingsHelper.getBackgroundPicture();
                         updateColors();
                         updatePaints();
@@ -573,56 +567,5 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         }
 
         //endregion
-
-
-        /*
-         * Font size adjustment.
-         */
-        // region
-
-        private void adjustTextSizeForDate(String dateStr, int wantedWidth) {
-            mDatePaint.setTextSize(getFitTextSizeForDate(dateStr, wantedWidth));
-        }
-
-        private int getFitTextSizeForDate(String dateStr, int wantedWidth) {
-            String key = wantedWidth + dateStr;
-            Integer res = mDateSizeCache.get(key);
-            if (res == null) {
-                res = computeFitTextSizeForDate(dateStr, wantedWidth);
-                mDateSizeCache.put(key, res);
-            }
-            return res;
-        }
-
-        private int computeFitTextSizeForDate(String dateStr, int wantedWidth) {
-            int step = 4;
-            int measure = (int) mDatePaint.measureText(dateStr);
-            if (measure == wantedWidth) {
-                // Perfect fit: do nothing
-            } else if (measure < wantedWidth) {
-                // Narrower: try a bigger font
-                do {
-                    mDatePaint.setTextSize(mDatePaint.getTextSize() + step);
-                } while ((measure = (int) mDatePaint.measureText(dateStr)) < wantedWidth);
-                if (measure > wantedWidth) {
-                    // We went too far
-                    mDatePaint.setTextSize(mDatePaint.getTextSize() - step);
-                }
-            } else {
-                // Wider: try a smaller font
-                do {
-                    mDatePaint.setTextSize(mDatePaint.getTextSize() - step);
-                } while (mDatePaint.measureText(dateStr) > wantedWidth);
-            }
-            return (int) mDatePaint.getTextSize();
-        }
-
-        private void adjustSecondsAndAmPmSizes() {
-            float size = mHourMinutesNormalPaint.getTextSize();
-            mSecondsPaint.setTextSize(size * SECONDS_SIZE_FACTOR);
-            mAmPmNormalPaint.setTextSize(size * AM_PM_SIZE_FACTOR);
-        }
-
-        // endregion
     }
 }
