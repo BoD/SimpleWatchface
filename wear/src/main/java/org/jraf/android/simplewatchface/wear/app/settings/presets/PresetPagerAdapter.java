@@ -82,7 +82,7 @@ public class PresetPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         ColorPreset colorPreset = mColorPresetList.get(position);
 
-        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page_rect, container, false);
+        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page, container, false);
 
         // Background
         ImageView conBackground = (ImageView) res.findViewById(R.id.imgBackground);
@@ -101,11 +101,6 @@ public class PresetPagerAdapter extends PagerAdapter {
         Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontDate());
         watchFaceView.setTimeTypeface(timeTypeface);
         watchFaceView.setDateTypeface(dateTypeface);
-
-        watchFaceView.setHourMinutesColor(0xFFFF0000);
-        watchFaceView.setSecondsColor(0xFFFF0000);
-        watchFaceView.setAmPmColor(0xFFFF0000);
-        watchFaceView.setDateColor(0xFFFF0000);
 
         // Colors
         watchFaceView.setHourMinutesColor(colorPreset.hourMinutes);

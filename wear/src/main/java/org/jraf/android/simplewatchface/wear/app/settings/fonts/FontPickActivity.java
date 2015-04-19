@@ -33,10 +33,11 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.view.WatchViewStub;
+import android.view.View;
+import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
-import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 
 import butterknife.ButterKnife;
 import butterknife.InjectView;
@@ -60,13 +61,13 @@ public class FontPickActivity extends Activity {
         setContentView(R.layout.preset_pick);
 
         mMode = (Mode) getIntent().getSerializableExtra(EXTRA_MODE);
+        mAdapter = new FontPagerAdapter(FontPickActivity.this, mMode);
 
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.viewStub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 ButterKnife.inject(FontPickActivity.this, stub);
-                mAdapter = new FontPagerAdapter(FontPickActivity.this, mMode);
                 mVpgPresets.setAdapter(mAdapter);
                 mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
                 mVpgPresets.setPageMargin(0);
@@ -93,6 +94,15 @@ public class FontPickActivity extends Activity {
                 revealAnimator.setStartDelay(500);
                 revealAnimator.start();
 
+            }
+        });
+
+        stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                mAdapter.setIsRound(insets.isRound());
+                stub.onApplyWindowInsets(insets);
+                return insets;
             }
         });
     }

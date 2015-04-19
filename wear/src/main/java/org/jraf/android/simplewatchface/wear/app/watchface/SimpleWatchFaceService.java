@@ -59,7 +59,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
     /**
      * How small the am/pm indicator is compared to hour / minutes.
      */
-    public static final float AM_PM_SIZE_FACTOR = .33f;
+    public static final float AM_PM_SIZE_FACTOR = .35f;
 
     protected SimpleWatchFaceService mService = this;
 
@@ -244,9 +244,12 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             } else {
                 style = Paint.Style.FILL;
             }
-            mHourMinutesPaint.setStyle(style);;
-            mSecondsPaint.setStyle(style);;
-            mAmPmPaint.setStyle(style);;
+            mHourMinutesPaint.setStyle(style);
+            ;
+            mSecondsPaint.setStyle(style);
+            ;
+            mAmPmPaint.setStyle(style);
+            ;
             mDatePaint.setStyle(style);
 
             // Typefaces
@@ -466,7 +469,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         if (secondsStr != null) {
             // Measure seconds
             secondsBounds = new Rect();
-            secondsPaint.getTextBounds(secondsStr, 0, secondsStr.length(), secondsBounds);
+            // Use "00" as a fixed text that's wide
+            secondsPaint.getTextBounds("00", 0, 2, secondsBounds);
             secondsHeight = secondsBounds.height();
         }
 
@@ -488,11 +492,13 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         int dateX;
         if (isRound) {
             // Top depends on width
-            int topForWidth = getTopForWidth(canvasWidth, hourMinutesWidth);
-            top = Math.max(marginBorders, topForWidth);
+            int hourMinutesTotalWidth = hourMinutesWidth + Math.max(secondsStr == null ? 0 : marginSeconds + secondsBounds.width(), amPmStr == null ? 0 :
+                    marginSeconds + amPmBounds.width());
+            int topForWidth = getTopForWidth(canvasWidth, hourMinutesTotalWidth);
+            top = topForWidth + marginBorders;
 
             // Horizontally centered
-            hourMinutesX = (canvasWidth - hourMinutesWidth) / 2;
+            hourMinutesX = (canvasWidth - hourMinutesTotalWidth) / 2;
             dateX = (canvasWidth - dateWidth) / 2;
         } else {
             // Top is always the border margin

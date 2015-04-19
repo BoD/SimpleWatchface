@@ -28,21 +28,29 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.support.v4.view.PagerAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import org.jraf.android.simplewatchface.R;
+import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
+import org.jraf.android.simplewatchface.wear.widget.WatchFaceView;
 
 public class FontPagerAdapter extends PagerAdapter {
     private final Context mContext;
+    private final SettingsHelper mSettingsHelper;
     private final FontPickActivity.Mode mMode;
     private ArrayList<String> mFontNameList = new ArrayList<>();
+    private boolean mIsRound;
 
     public FontPagerAdapter(Context context, FontPickActivity.Mode mode) {
         mContext = context;
         mMode = mode;
+        mSettingsHelper = SettingsHelper.get(context);
         try {
             mFontNameList.addAll(Arrays.asList(mContext.getAssets().list("fonts")));
         } catch (Exception e) {
@@ -58,50 +66,42 @@ public class FontPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page_rect, container, false);
-//        View conBackground = res.findViewById(R.id.conBackground);
-//        TextView txtHourMinutes = (TextView) res.findViewById(R.id.txtHourMinutes);
-//        TextView txtSeconds = (TextView) res.findViewById(R.id.txtSeconds);
-//        TextView txtAmPm = (TextView) res.findViewById(R.id.txtAmPm);
-//        TextView txtDate = (TextView) res.findViewById(R.id.txtDate);
-//
-//        boolean is24HourFormat = DateFormat.is24HourFormat(mContext);
-//        if (is24HourFormat) txtAmPm.setVisibility(View.INVISIBLE);
-//
-//        SettingsHelper settingsHelper = SettingsHelper.get(mContext);
-//
-//        // Typefaces
-//        Typeface timeTypeface;
-//        Typeface dateTypeface;
-//        if (mMode == FontPickActivity.Mode.TIME) {
-//            // Preview the time font
-//            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
-//            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + settingsHelper.getFontDate());
-//        } else {
-//            // Preview the date font
-//            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + settingsHelper.getFontTime());
-//            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
-//        }
-//
-//        txtHourMinutes.setTypeface(timeTypeface);
-//        txtSeconds.setTypeface(timeTypeface);
-//        txtAmPm.setTypeface(timeTypeface);
-//        txtDate.setTypeface(dateTypeface);
-//
-//        // Colors
-//        // Background
-//        Bitmap backgroundPicture = settingsHelper.getBackgroundPicture();
-//        if (backgroundPicture != null) {
-//            conBackground.setBackground(new BitmapDrawable(mContext.getResources(), backgroundPicture));
-//        } else {
-//            conBackground.setBackgroundColor(settingsHelper.getColorBackground());
-//        }
-//        txtHourMinutes.setTextColor(settingsHelper.getColorHourMinutes());
-//        txtSeconds.setTextColor(settingsHelper.getColorSeconds());
-//        txtAmPm.setTextColor(settingsHelper.getColorAmPm());
-//        txtDate.setTextColor(settingsHelper.getColorDate());
-//
-//        container.addView(res);
+        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page, container, false);
+
+        // Background
+        ImageView conBackground = (ImageView) res.findViewById(R.id.imgBackground);
+        Bitmap backgroundPicture = mSettingsHelper.getBackgroundPicture();
+        if (backgroundPicture != null) {
+            conBackground.setImageBitmap(backgroundPicture);
+        } else {
+            conBackground.setBackgroundColor(mSettingsHelper.getColorBackground());
+        }
+
+        WatchFaceView watchFaceView = (WatchFaceView) res.findViewById(R.id.vieWatchFace);
+        watchFaceView.setIsRound(mIsRound);
+
+        // Typefaces
+        Typeface timeTypeface;
+        Typeface dateTypeface;
+        if (mMode == FontPickActivity.Mode.TIME) {
+            // Preview the time font
+            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
+            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontDate());
+        } else {
+            // Preview the date font
+            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontTime());
+            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
+        }
+        watchFaceView.setTimeTypeface(timeTypeface);
+        watchFaceView.setDateTypeface(dateTypeface);
+
+        // Colors
+        watchFaceView.setHourMinutesColor(mSettingsHelper.getColorHourMinutes());
+        watchFaceView.setSecondsColor(mSettingsHelper.getColorSeconds());
+        watchFaceView.setAmPmColor(mSettingsHelper.getColorAmPm());
+        watchFaceView.setDateColor(mSettingsHelper.getColorDate());
+
+        container.addView(res);
 
         return res;
     }
@@ -118,5 +118,9 @@ public class FontPagerAdapter extends PagerAdapter {
 
     public String getFontName(int index) {
         return mFontNameList.get(index);
+    }
+
+    public void setIsRound(boolean isRound) {
+        mIsRound = isRound;
     }
 }
