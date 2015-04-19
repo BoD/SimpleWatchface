@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <!--
   This source is part of the
        _____  ___   ____
@@ -22,13 +23,8 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
-    <dimen name="settings_preset_pick_reveal">64dp</dimen>
-    <dimen name="wf_shadow_radius_big">3dp</dimen>
-    <dimen name="wf_shadow_radius_small">2dp</dimen>
-    <dimen name="wf_size_hourMinutes">44sp</dimen>
-    <dimen name="wf_size_date">28sp</dimen>
-    <dimen name="wf_margin_borders">8dp</dimen>
-    <dimen name="wf_margin_seconds">4dp</dimen>
-    <dimen name="wf_margin_date">4dp</dimen>
-</resources>
+<org.jraf.android.simplewatchface.wear.widget.WatchFaceView
+    android:id="@+id/vieWatchFace"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />

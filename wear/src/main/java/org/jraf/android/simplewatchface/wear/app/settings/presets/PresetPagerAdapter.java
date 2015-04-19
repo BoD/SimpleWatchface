@@ -24,22 +24,19 @@
  */
 package org.jraf.android.simplewatchface.wear.app.settings.presets;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.view.PagerAdapter;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
-
-import java.util.ArrayList;
+import org.jraf.android.simplewatchface.wear.widget.WatchFaceView;
 
 public class PresetPagerAdapter extends PagerAdapter {
     private final Context mContext;
@@ -78,38 +75,43 @@ public class PresetPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page, container, false);
-        View conBackground = res.findViewById(R.id.conBackground);
-        TextView txtHourMinutes = (TextView) res.findViewById(R.id.txtHourMinutes);
-        TextView txtSeconds = (TextView) res.findViewById(R.id.txtSeconds);
-        TextView txtAmPm = (TextView) res.findViewById(R.id.txtAmPm);
-        TextView txtDate = (TextView) res.findViewById(R.id.txtDate);
-
-        boolean is24HourFormat = DateFormat.is24HourFormat(mContext);
-        if (is24HourFormat) txtAmPm.setVisibility(View.INVISIBLE);
-
-        // Typefaces
-        Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontTime());
-        Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontDate());
-        txtHourMinutes.setTypeface(timeTypeface);
-        txtSeconds.setTypeface(timeTypeface);
-        txtAmPm.setTypeface(timeTypeface);
-        txtDate.setTypeface(dateTypeface);
-
-        // Colors
-        ColorPreset colorPreset = mColorPresetList.get(position);
-        // Background
-        Bitmap backgroundPicture = SettingsHelper.get(mContext).getBackgroundPicture();
-        if (backgroundPicture != null) {
-            conBackground.setBackground(new BitmapDrawable(mContext.getResources(), backgroundPicture));
-        } else {
-            conBackground.setBackgroundColor(colorPreset.background);
-        }
-        txtHourMinutes.setTextColor(colorPreset.hourMinutes);
-        txtSeconds.setTextColor(colorPreset.seconds);
-        txtAmPm.setTextColor(colorPreset.amPm);
-        txtDate.setTextColor(colorPreset.date);
-
+        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page_rect, container, false);
+        WatchFaceView watchFaceView = (WatchFaceView) res.findViewById(R.id.vieWatchFace);
+        watchFaceView.setHourMinutesColor(0xFFFF0000);
+        watchFaceView.setSecondsColor(0xFFFF0000);
+        watchFaceView.setAmPmColor(0xFFFF0000);
+        watchFaceView.setDateColor(0xFFFF0000);
+//        View conBackground = res.findViewById(R.id.conBackground);
+//        TextView txtHourMinutes = (TextView) res.findViewById(R.id.txtHourMinutes);
+//        TextView txtSeconds = (TextView) res.findViewById(R.id.txtSeconds);
+//        TextView txtAmPm = (TextView) res.findViewById(R.id.txtAmPm);
+//        TextView txtDate = (TextView) res.findViewById(R.id.txtDate);
+//
+//        boolean is24HourFormat = DateFormat.is24HourFormat(mContext);
+//        if (is24HourFormat) txtAmPm.setVisibility(View.INVISIBLE);
+//
+//        // Typefaces
+//        Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontTime());
+//        Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontDate());
+//        txtHourMinutes.setTypeface(timeTypeface);
+//        txtSeconds.setTypeface(timeTypeface);
+//        txtAmPm.setTypeface(timeTypeface);
+//        txtDate.setTypeface(dateTypeface);
+//
+//        // Colors
+//        ColorPreset colorPreset = mColorPresetList.get(position);
+//        // Background
+//        Bitmap backgroundPicture = SettingsHelper.get(mContext).getBackgroundPicture();
+//        if (backgroundPicture != null) {
+//            conBackground.setBackground(new BitmapDrawable(mContext.getResources(), backgroundPicture));
+//        } else {
+//            conBackground.setBackgroundColor(colorPreset.background);
+//        }
+//        txtHourMinutes.setTextColor(colorPreset.hourMinutes);
+//        txtSeconds.setTextColor(colorPreset.seconds);
+//        txtAmPm.setTextColor(colorPreset.amPm);
+//        txtDate.setTextColor(colorPreset.date);
+//
         container.addView(res);
 
         return res;
