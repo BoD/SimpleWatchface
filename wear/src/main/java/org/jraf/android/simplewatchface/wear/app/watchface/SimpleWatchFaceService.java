@@ -59,7 +59,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
     /**
      * How small the am/pm indicator is compared to hour / minutes.
      */
-    public static final float AM_PM_SIZE_FACTOR = .4f;
+    public static final float AM_PM_SIZE_FACTOR = .33f;
 
     protected SimpleWatchFaceService mService = this;
 

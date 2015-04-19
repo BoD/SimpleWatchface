@@ -33,6 +33,8 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.view.WatchViewStub;
+import android.view.View;
+import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
@@ -54,12 +56,14 @@ public class PresetPickActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.preset_pick);
+
+        mAdapter = new PresetPagerAdapter(PresetPickActivity.this);
+
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.viewStub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
                 ButterKnife.inject(PresetPickActivity.this, stub);
-                mAdapter = new PresetPagerAdapter(PresetPickActivity.this);
                 mVpgPresets.setAdapter(mAdapter);
                 mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
                 mVpgPresets.setPageMargin(0);
@@ -86,6 +90,15 @@ public class PresetPickActivity extends Activity {
                 revealAnimator.setStartDelay(500);
                 revealAnimator.start();
 
+            }
+        });
+
+        stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                mAdapter.setIsRound(insets.isRound());
+                stub.onApplyWindowInsets(insets);
+                return insets;
             }
         });
     }

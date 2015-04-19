@@ -31,6 +31,7 @@ import java.util.Locale;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.text.format.DateFormat;
 import android.text.format.Time;
@@ -103,6 +104,17 @@ public class WatchFaceView extends View {
         int dateTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_date);
         mDatePaint.setTextSize(dateTextSize);
         mDatePaint.setAntiAlias(true);
+
+        // Shadows
+        int shadowColor = 0xFF000000; // black
+        int shadowRadiusBig = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_big);
+        int shadowDeltaBig = (int) (shadowRadiusBig / 1.5);
+        int shadowRadiusSmall = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_small);
+        int shadowDeltaSmall = (int) (shadowRadiusSmall / 1.5);
+        mHourMinutesPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
+        mSecondsPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
+        mAmPmPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
+        mDatePaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
     }
 
     public void setHourMinutesColor(int color) {
@@ -120,6 +132,17 @@ public class WatchFaceView extends View {
     public void setDateColor(int color) {
         mDatePaint.setColor(color);
     }
+
+    public void setTimeTypeface(Typeface typeface) {
+        mHourMinutesPaint.setTypeface(typeface);
+        mSecondsPaint.setTypeface(typeface);
+        mAmPmPaint.setTypeface(typeface);
+    }
+
+    public void setDateTypeface(Typeface typeface) {
+        mDatePaint.setTypeface(typeface);
+    }
+
 
     /*
      * Time / date formatting.
@@ -185,8 +208,13 @@ public class WatchFaceView extends View {
         @Override
         public void run() {
             invalidate();
-            mHandler.postDelayed(mInvalidateRunnable, 1000);
+            if (isAttachedToWindow()) {
+                mHandler.postDelayed(mInvalidateRunnable, 1000);
+            }
         }
     };
 
+    public void setIsRound(boolean isRound) {
+        mIsRound = isRound;
+    }
 }
