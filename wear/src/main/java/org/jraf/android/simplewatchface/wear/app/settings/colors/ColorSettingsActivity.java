@@ -57,36 +57,36 @@ public class ColorSettingsActivity extends Activity implements WearableListView.
     private int[] getColorsFromPreferences() {
         if (mColorsFromPreferences == null) {
             mColorsFromPreferences = new int[6];
-            SettingsHelper preferenceHelper = SettingsHelper.get(this);
-            mColorsFromPreferences[0] = preferenceHelper.getColorBackground();
-            mColorsFromPreferences[1] = preferenceHelper.getColorHourMinutes();
-            mColorsFromPreferences[2] = preferenceHelper.getColorSeconds();
-            mColorsFromPreferences[3] = preferenceHelper.getColorAmPm();
-            mColorsFromPreferences[4] = preferenceHelper.getColorDate();
+            SettingsHelper settingsHelper= SettingsHelper.get(this);
+            mColorsFromPreferences[0] = settingsHelper.getColorBackground();
+            mColorsFromPreferences[1] = settingsHelper.getColorHourMinutes();
+            mColorsFromPreferences[2] = settingsHelper.getColorSeconds();
+            mColorsFromPreferences[3] = settingsHelper.getColorAmPm();
+            mColorsFromPreferences[4] = settingsHelper.getColorDate();
         }
         return mColorsFromPreferences;
     }
 
     private void saveColorToPreferences(int itemPostion, int pickedColor) {
-        SettingsHelper preferenceHelper = SettingsHelper.get(this);
+        SettingsHelper settingsHelper = SettingsHelper.get(this);
 
         switch (itemPostion) {
             case 0:
-                preferenceHelper.setColorBackground(pickedColor);
+                settingsHelper.putColorBackground(pickedColor);
                 // Also indicate that we want to use the background color (not the background picture)
-                preferenceHelper.setBackgroundPicture(null);
+                settingsHelper.setBackgroundPicture(null);
                 break;
             case 1:
-                preferenceHelper.setColorHourMinutes(pickedColor);
+                settingsHelper.putColorHourMinutes(pickedColor);
                 break;
             case 2:
-                preferenceHelper.setColorSeconds(pickedColor);
+                settingsHelper.putColorSeconds(pickedColor);
                 break;
             case 3:
-                preferenceHelper.setColorAmPm(pickedColor);
+                settingsHelper.putColorAmPm(pickedColor);
                 break;
             case 4:
-                preferenceHelper.setColorDate(pickedColor);
+                settingsHelper.putColorDate(pickedColor);
                 break;
         }
     }

@@ -116,7 +116,7 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                     break;
                 }
                 String fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
-                SettingsHelper.get(this).setFontTime(fontName);
+                SettingsHelper.get(this).putFontTime(fontName);
                 break;
 
             case REQUEST_PICK_FONT_DATE:
@@ -125,17 +125,17 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                     break;
                 }
                 fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
-                SettingsHelper.get(this).setFontDate(fontName);
+                SettingsHelper.get(this).putFontDate(fontName);
                 break;
         }
     }
 
     private void saveColorPresetToPreferences(ColorPreset colorPreset) {
         SettingsHelper settingsHelper = SettingsHelper.get(this);
-        settingsHelper.setColorBackground(colorPreset.background);
-        settingsHelper.setColorHourMinutes(colorPreset.hourMinutes);
-        settingsHelper.setColorSeconds(colorPreset.seconds);
-        settingsHelper.setColorAmPm(colorPreset.amPm);
-        settingsHelper.setColorDate(colorPreset.date);
+        settingsHelper.putColorBackground(colorPreset.background);
+        settingsHelper.putColorHourMinutes(colorPreset.hourMinutes);
+        settingsHelper.putColorSeconds(colorPreset.seconds);
+        settingsHelper.putColorAmPm(colorPreset.amPm);
+        settingsHelper.putColorDate(colorPreset.date);
     }
 }
