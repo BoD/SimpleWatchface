@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.jraf.android.simplewatchface">
+    package="org.jraf.android.simplewatchface"
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="com.google.android.permission.PROVIDE_BACKGROUND" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -13,6 +13,7 @@
         android:theme="@style/Theme.App">
         <activity
             android:name=".mobile.app.settings.BackgroundSetActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/title_activity_background_crop">
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
