@@ -27,8 +27,8 @@ package org.jraf.android.simplewatchface.wear.app.settings.main;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.view.WearableListView;
-import android.widget.Toast;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.SettingsAdapter;
@@ -89,7 +89,12 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
             case 4:
                 // Reset background image
                 SettingsHelper.get(this).setBackgroundPicture(null);
-                Toast.makeText(this, R.string.settings_resetBackgroundImage_success, Toast.LENGTH_SHORT).show();
+
+                intent = new Intent(this, ConfirmationActivity.class);
+                intent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION);
+                intent.putExtra(ConfirmationActivity.EXTRA_MESSAGE, getString(R.string.settings_resetBackgroundImage_success));
+                startActivity(intent);
+
                 break;
         }
     }

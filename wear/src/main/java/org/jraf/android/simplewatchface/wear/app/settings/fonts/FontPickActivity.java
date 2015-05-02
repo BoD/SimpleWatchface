@@ -124,6 +124,7 @@ public class FontPickActivity extends Activity {
         showConfirmAnimation();
 
         finish();
+        overridePendingTransition(0, 0);
     }
 
     private void showConfirmAnimation() {

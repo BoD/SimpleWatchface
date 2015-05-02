@@ -47,7 +47,7 @@ dependencies {
     compile 'org.jraf:android-wear-color-picker:1.0.1'
     compile 'com.jakewharton:butterknife:6.1.0'
     compile 'com.android.support:palette-v7:21.0.0'
-    apt 'org.jraf:prefs-compiler:1.0.0'
-    compile 'org.jraf:prefs:1.0.0'
+    apt 'org.jraf:prefs-compiler:1.0.1'
+    compile 'org.jraf:prefs:1.0.1'
     compile project(':common')
 }

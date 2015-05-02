@@ -120,6 +120,7 @@ public class PresetPickActivity extends Activity {
         showConfirmAnimation();
 
         finish();
+        overridePendingTransition(0, 0);
     }
 
     private void showConfirmAnimation() {
