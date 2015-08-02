@@ -267,11 +267,11 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 mAmPmPaint.setShadowLayer(0, 0, 0, 0);
                 mDatePaint.setShadowLayer(0, 0, 0, 0);
             } else {
-                int shadowColor = 0xFF000000; // black
+                int shadowColor = 0x80000000; // black
                 int shadowRadiusBig = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_big);
-                int shadowDeltaBig = (int) (shadowRadiusBig / 1.5);
+                int shadowDeltaBig = 0;
                 int shadowRadiusSmall = getResources().getDimensionPixelSize(R.dimen.wf_shadow_radius_small);
-                int shadowDeltaSmall = (int) (shadowRadiusSmall / 1.5);
+                int shadowDeltaSmall = 0;
                 mHourMinutesPaint.setShadowLayer(shadowRadiusBig, shadowDeltaBig, shadowDeltaBig, shadowColor);
                 mSecondsPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);
                 mAmPmPaint.setShadowLayer(shadowRadiusSmall, shadowDeltaSmall, shadowDeltaSmall, shadowColor);

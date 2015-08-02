@@ -39,17 +39,17 @@ import android.view.WindowInsets;
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 public class FontPickActivity extends Activity {
-    public static enum Mode {TIME, DATE,}
+    public enum Mode {TIME, DATE,}
 
     public static final String EXTRA_MODE = "EXTRA_MODE";
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
-    @InjectView(R.id.vpgPresets)
+    @Bind(R.id.vpgPresets)
     protected ViewPager mVpgPresets;
 
     private Mode mMode = Mode.TIME;
@@ -67,7 +67,7 @@ public class FontPickActivity extends Activity {
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                ButterKnife.inject(FontPickActivity.this, stub);
+                ButterKnife.bind(FontPickActivity.this, stub);
                 mVpgPresets.setAdapter(mAdapter);
                 mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
                 mVpgPresets.setPageMargin(0);

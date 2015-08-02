@@ -40,14 +40,14 @@ import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 public class PresetPickActivity extends Activity {
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
-    @InjectView(R.id.vpgPresets)
+    @Bind(R.id.vpgPresets)
     protected ViewPager mVpgPresets;
 
     private PresetPagerAdapter mAdapter;
@@ -63,7 +63,7 @@ public class PresetPickActivity extends Activity {
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                ButterKnife.inject(PresetPickActivity.this, stub);
+                ButterKnife.bind(PresetPickActivity.this, stub);
                 mVpgPresets.setAdapter(mAdapter);
                 mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
                 mVpgPresets.setPageMargin(0);
