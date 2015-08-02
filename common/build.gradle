@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 22
-    buildToolsVersion '22.0.0'
+    buildToolsVersion '22.0.1'
 
     defaultConfig {
         minSdkVersion 18
@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    compile 'com.google.android.gms:play-services:7.0.0'
+    compile 'com.google.android.gms:play-services:7.5.0'
     compile 'org.jraf:jraf-android-util:1.0.0'
 }

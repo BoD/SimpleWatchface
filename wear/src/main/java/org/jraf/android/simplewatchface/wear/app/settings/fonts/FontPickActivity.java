@@ -49,7 +49,7 @@ public class FontPickActivity extends Activity {
     public static final String EXTRA_MODE = "EXTRA_MODE";
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
-    @Bind(R.id.vpgPresets)
+    @Bind(R.id.vpgSettings)
     protected ViewPager mVpgPresets;
 
     private Mode mMode = Mode.TIME;
@@ -58,7 +58,7 @@ public class FontPickActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.preset_pick);
+        setContentView(R.layout.settings_pick);
 
         mMode = (Mode) getIntent().getSerializableExtra(EXTRA_MODE);
         mAdapter = new FontPagerAdapter(FontPickActivity.this, mMode);
@@ -91,7 +91,7 @@ public class FontPickActivity extends Activity {
                     }
                 });
                 revealAnimator.setDuration(200);
-                revealAnimator.setStartDelay(500);
+                revealAnimator.setStartDelay(1000);
                 revealAnimator.start();
 
             }

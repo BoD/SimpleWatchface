@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings.presets;
+package org.jraf.android.simplewatchface.wear.app.settings.size;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -38,43 +38,47 @@ import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
-import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class PresetPickActivity extends Activity {
+public class SizePickActivity extends Activity {
+    public enum Mode {TIME, DATE,}
+
+    public static final String EXTRA_MODE = "EXTRA_MODE";
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
     @Bind(R.id.vpgSettings)
-    protected ViewPager mVpgPresets;
+    protected ViewPager mVpgSettings;
 
-    private PresetPagerAdapter mAdapter;
+    private Mode mMode = Mode.TIME;
+    private SizePagerAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_pick);
 
-        mAdapter = new PresetPagerAdapter(PresetPickActivity.this);
+        mMode = (Mode) getIntent().getSerializableExtra(EXTRA_MODE);
+        mAdapter = new SizePagerAdapter(SizePickActivity.this, mMode);
 
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.viewStub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                ButterKnife.bind(PresetPickActivity.this, stub);
-                mVpgPresets.setAdapter(mAdapter);
-                mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
-                mVpgPresets.setPageMargin(0);
+                ButterKnife.bind(SizePickActivity.this, stub);
+                mVpgSettings.setAdapter(mAdapter);
+                mVpgSettings.setPageTransformer(true, new ZoomOutPageTransformer());
+                mVpgSettings.setPageMargin(0);
 
                 // Reveal a bit of the next page to indicate to the user that this is a ViewPager
-                mVpgPresets.beginFakeDrag();
+                mVpgSettings.beginFakeDrag();
                 Object revealObject = new Object() {
                     private int mPrevValue;
 
                     public void setDragBy(int value) {
-                        mVpgPresets.fakeDragBy(value - mPrevValue);
+                        mVpgSettings.fakeDragBy(value - mPrevValue);
                         mPrevValue = value;
                     }
                 };
@@ -83,7 +87,7 @@ public class PresetPickActivity extends Activity {
                 revealAnimator.addListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        mVpgPresets.endFakeDrag();
+                        mVpgSettings.endFakeDrag();
                     }
                 });
                 revealAnimator.setDuration(200);
@@ -112,9 +116,9 @@ public class PresetPickActivity extends Activity {
     @OnClick(R.id.btnOk)
     protected void onOkClicked() {
         Intent result = new Intent();
-        int currentIndex = mVpgPresets.getCurrentItem();
-        ColorPreset colorPreset = mAdapter.getColorPreset(currentIndex);
-        result.putExtra(EXTRA_RESULT, colorPreset);
+        int currentIndex = mVpgSettings.getCurrentItem();
+        String fontName = mAdapter.getFontName(currentIndex);
+        result.putExtra(EXTRA_RESULT, fontName);
         setResult(RESULT_OK, result);
 
         showConfirmAnimation();

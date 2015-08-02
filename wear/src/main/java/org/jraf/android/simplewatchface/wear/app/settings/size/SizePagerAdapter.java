@@ -22,7 +22,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear.app.settings.fonts;
+package org.jraf.android.simplewatchface.wear.app.settings.size;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,14 +40,14 @@ import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 import org.jraf.android.simplewatchface.wear.widget.WatchFaceView;
 
-public class FontPagerAdapter extends PagerAdapter {
+public class SizePagerAdapter extends PagerAdapter {
     private final Context mContext;
     private final SettingsHelper mSettingsHelper;
-    private final FontPickActivity.Mode mMode;
+    private final SizePickActivity.Mode mMode;
     private ArrayList<String> mFontNameList = new ArrayList<>();
     private boolean mIsRound;
 
-    public FontPagerAdapter(Context context, FontPickActivity.Mode mode) {
+    public SizePagerAdapter(Context context, SizePickActivity.Mode mode) {
         mContext = context;
         mMode = mode;
         mSettingsHelper = SettingsHelper.get(context);
@@ -83,7 +83,7 @@ public class FontPagerAdapter extends PagerAdapter {
         // Typefaces
         Typeface timeTypeface;
         Typeface dateTypeface;
-        if (mMode == FontPickActivity.Mode.TIME) {
+        if (mMode == SizePickActivity.Mode.TIME) {
             // Preview the time font
             timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
             dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontDate());

@@ -82,7 +82,7 @@ public class PresetPagerAdapter extends PagerAdapter {
     public Object instantiateItem(ViewGroup container, int position) {
         ColorPreset colorPreset = mColorPresetList.get(position);
 
-        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page, container, false);
+        View res = LayoutInflater.from(mContext).inflate(R.layout.settings_pick_page, container, false);
 
         // Background
         ImageView conBackground = (ImageView) res.findViewById(R.id.imgBackground);
