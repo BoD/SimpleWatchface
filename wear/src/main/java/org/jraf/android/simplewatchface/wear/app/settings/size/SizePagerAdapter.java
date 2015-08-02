@@ -25,7 +25,6 @@
 package org.jraf.android.simplewatchface.wear.app.settings.size;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -41,27 +40,26 @@ import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 import org.jraf.android.simplewatchface.wear.widget.WatchFaceView;
 
 public class SizePagerAdapter extends PagerAdapter {
+    private static final int MIN_SIZE = 16;
+    private static final int MAX_SIZE = 54;
     private final Context mContext;
     private final SettingsHelper mSettingsHelper;
     private final SizePickActivity.Mode mMode;
-    private ArrayList<String> mFontNameList = new ArrayList<>();
+    private ArrayList<Integer> mSizeList = new ArrayList<>();
     private boolean mIsRound;
 
     public SizePagerAdapter(Context context, SizePickActivity.Mode mode) {
         mContext = context;
         mMode = mode;
         mSettingsHelper = SettingsHelper.get(context);
-        try {
-            mFontNameList.addAll(Arrays.asList(mContext.getAssets().list("fonts")));
-        } catch (Exception e) {
-            // Should never happen
-            throw new AssertionError(e);
+        for (int size = MIN_SIZE; size <= MAX_SIZE; size += 2) {
+            mSizeList.add(size);
         }
     }
 
     @Override
     public int getCount() {
-        return mFontNameList.size();
+        return mSizeList.size();
     }
 
     @Override
@@ -81,19 +79,17 @@ public class SizePagerAdapter extends PagerAdapter {
         watchFaceView.setIsRound(mIsRound);
 
         // Typefaces
-        Typeface timeTypeface;
-        Typeface dateTypeface;
-        if (mMode == SizePickActivity.Mode.TIME) {
-            // Preview the time font
-            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
-            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontDate());
-        } else {
-            // Preview the date font
-            timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontTime());
-            dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mFontNameList.get(position));
-        }
+        Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontTime());
         watchFaceView.setTimeTypeface(timeTypeface);
+        Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontDate());
         watchFaceView.setDateTypeface(dateTypeface);
+
+        // Sizes
+        if (mMode == SizePickActivity.Mode.TIME) {
+            watchFaceView.setTimeSize(mSizeList.get(position));
+        } else {
+            watchFaceView.setDateSize(mSizeList.get(position));
+        }
 
         // Colors
         watchFaceView.setHourMinutesColor(mSettingsHelper.getColorHourMinutes());
@@ -116,8 +112,8 @@ public class SizePagerAdapter extends PagerAdapter {
         container.removeView((View) object);
     }
 
-    public String getFontName(int index) {
-        return mFontNameList.get(index);
+    public int getSize(int index) {
+        return mSizeList.get(index);
     }
 
     public void setIsRound(boolean isRound) {

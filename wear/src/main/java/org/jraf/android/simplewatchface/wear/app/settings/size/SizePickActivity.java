@@ -117,8 +117,8 @@ public class SizePickActivity extends Activity {
     protected void onOkClicked() {
         Intent result = new Intent();
         int currentIndex = mVpgSettings.getCurrentItem();
-        String fontName = mAdapter.getFontName(currentIndex);
-        result.putExtra(EXTRA_RESULT, fontName);
+        int size = mAdapter.getSize(currentIndex);
+        result.putExtra(EXTRA_RESULT, size);
         setResult(RESULT_OK, result);
 
         showConfirmAnimation();

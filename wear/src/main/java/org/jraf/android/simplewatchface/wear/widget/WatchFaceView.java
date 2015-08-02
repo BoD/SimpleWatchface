@@ -40,6 +40,7 @@ import android.view.View;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.watchface.SimpleWatchFaceService;
+import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 
 public class WatchFaceView extends View {
     private Time mTime = new Time();
@@ -87,23 +88,22 @@ public class WatchFaceView extends View {
         mIs24HourFormat = DateFormat.is24HourFormat(context);
 
         // Paints
-        int hourMinutesTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_hourMinutes);
         mHourMinutesPaint = new Paint();
-        mHourMinutesPaint.setTextSize(hourMinutesTextSize);
         mHourMinutesPaint.setAntiAlias(true);
 
         mSecondsPaint = new Paint();
-        mSecondsPaint.setTextSize(hourMinutesTextSize * SimpleWatchFaceService.SECONDS_SIZE_FACTOR);
         mSecondsPaint.setAntiAlias(true);
 
         mAmPmPaint = new Paint();
-        mAmPmPaint.setTextSize(hourMinutesTextSize * SimpleWatchFaceService.AM_PM_SIZE_FACTOR);
         mAmPmPaint.setAntiAlias(true);
 
         mDatePaint = new Paint();
-        int dateTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_date);
-        mDatePaint.setTextSize(dateTextSize);
         mDatePaint.setAntiAlias(true);
+
+        // Sizes
+        SettingsHelper settingsHelper = SettingsHelper.get(getContext());
+        setTimeSize(settingsHelper.getSizeTime());
+        setDateSize(settingsHelper.getSizeDate());
 
         // Shadows
         int shadowColor = 0x80000000; // black
@@ -141,6 +141,17 @@ public class WatchFaceView extends View {
 
     public void setDateTypeface(Typeface typeface) {
         mDatePaint.setTypeface(typeface);
+    }
+
+    public void setTimeSize(int size) {
+        float hourMinutesSize = SimpleWatchFaceService.getPixelSizeFromSpSize(getContext(), size);
+        mHourMinutesPaint.setTextSize(hourMinutesSize);
+        mSecondsPaint.setTextSize(hourMinutesSize * SimpleWatchFaceService.SECONDS_SIZE_FACTOR);
+        mAmPmPaint.setTextSize(hourMinutesSize * SimpleWatchFaceService.AM_PM_SIZE_FACTOR);
+    }
+
+    public void setDateSize(int size) {
+        mDatePaint.setTextSize(SimpleWatchFaceService.getPixelSizeFromSpSize(getContext(), size));
     }
 
 

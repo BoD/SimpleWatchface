@@ -50,4 +50,10 @@ public class Settings {
 
     @DefaultString("Exo2-Italic.ttf")
     String fontDate;
+
+    @DefaultInt(44)
+    Integer sizeTime;
+
+    @DefaultInt(28)
+    Integer sizeDate;
 }

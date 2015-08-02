@@ -74,6 +74,10 @@
         <activity
             android:name=".wear.app.settings.fonts.FontPickActivity" />
 
+        <!-- Sizes -->
+        <activity
+            android:name=".wear.app.settings.size.SizePickActivity" />
+
         <!-- Confirmation -->
         <activity
             android:name="android.support.wearable.activity.ConfirmationActivity"

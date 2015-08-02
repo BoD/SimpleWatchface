@@ -28,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -42,6 +43,7 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.DateFormat;
 import android.text.format.Time;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
 import android.view.WindowInsets;
@@ -171,18 +173,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mBackgroundPaint.setStrokeWidth(1);
 
             mHourMinutesPaint = new Paint();
-            int hourMinutesTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_hourMinutes);
-            mHourMinutesPaint.setTextSize(hourMinutesTextSize);
-
             mSecondsPaint = new Paint();
-            mSecondsPaint.setTextSize(hourMinutesTextSize * SECONDS_SIZE_FACTOR);
-
             mAmPmPaint = new Paint();
-            mAmPmPaint.setTextSize(hourMinutesTextSize * AM_PM_SIZE_FACTOR);
-
             mDatePaint = new Paint();
-            int dateTextSize = getResources().getDimensionPixelSize(R.dimen.wf_size_date);
-            mDatePaint.setTextSize(dateTextSize);
 
             // Colors
             updateColors();
@@ -245,11 +238,8 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                 style = Paint.Style.FILL;
             }
             mHourMinutesPaint.setStyle(style);
-            ;
             mSecondsPaint.setStyle(style);
-            ;
             mAmPmPaint.setStyle(style);
-            ;
             mDatePaint.setStyle(style);
 
             // Typefaces
@@ -259,6 +249,15 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             mSecondsPaint.setTypeface(timeTypeface);
             mAmPmPaint.setTypeface(timeTypeface);
             mDatePaint.setTypeface(dateTypeface);
+
+            // Sizes
+            float hourMinutesTextSize = getPixelSizeFromSpSize(mService, mSettingsHelper.getSizeTime());
+            mHourMinutesPaint.setTextSize(hourMinutesTextSize);
+            mSecondsPaint.setTextSize(hourMinutesTextSize * SECONDS_SIZE_FACTOR);
+            mAmPmPaint.setTextSize(hourMinutesTextSize * AM_PM_SIZE_FACTOR);
+
+            float dateTextSize = getPixelSizeFromSpSize(mService, mSettingsHelper.getSizeDate());
+            mDatePaint.setTextSize(dateTextSize);
 
             // Shadows
             if (ambientMode) {
@@ -552,5 +551,9 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
 //        Rect textOffsetBounds = getTextOffsetBounds(textBounds);
 //        textOffsetBounds.offset(x, y);
 //        debugRect(c, textOffsetBounds);
+    }
+
+    public static float getPixelSizeFromSpSize(Context context, int spSize) {
+        return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, spSize, context.getResources().getDisplayMetrics());
     }
 }

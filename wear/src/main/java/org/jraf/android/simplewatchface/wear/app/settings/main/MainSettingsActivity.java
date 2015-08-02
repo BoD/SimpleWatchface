@@ -35,14 +35,16 @@ import org.jraf.android.simplewatchface.wear.app.settings.SettingsAdapter;
 import org.jraf.android.simplewatchface.wear.app.settings.colors.ColorSettingsActivity;
 import org.jraf.android.simplewatchface.wear.app.settings.fonts.FontPickActivity;
 import org.jraf.android.simplewatchface.wear.app.settings.presets.PresetPickActivity;
+import org.jraf.android.simplewatchface.wear.app.settings.size.SizePickActivity;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 
 public class MainSettingsActivity extends Activity implements WearableListView.ClickListener {
     private static final int REQUEST_PICK_PRESET = 0;
     private static final int REQUEST_PICK_FONT_TIME = 1;
-    private static final int REQUEST_PICK_FONT_DATE = 2;
-
+    private static final int REQUEST_PICK_SIZE_TIME = 2;
+    private static final int REQUEST_PICK_FONT_DATE = 3;
+    private static final int REQUEST_PICK_SIZE_DATE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,13 +82,27 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                 break;
 
             case 3:
+                // Time size
+                intent = new Intent(this, SizePickActivity.class);
+                intent.putExtra(SizePickActivity.EXTRA_MODE, SizePickActivity.Mode.TIME);
+                startActivityForResult(intent, REQUEST_PICK_SIZE_TIME);
+                break;
+
+            case 4:
                 // Date font
                 intent = new Intent(this, FontPickActivity.class);
                 intent.putExtra(FontPickActivity.EXTRA_MODE, FontPickActivity.Mode.DATE);
                 startActivityForResult(intent, REQUEST_PICK_FONT_DATE);
                 break;
 
-            case 4:
+            case 5:
+                // Date size
+                intent = new Intent(this, SizePickActivity.class);
+                intent.putExtra(SizePickActivity.EXTRA_MODE, SizePickActivity.Mode.DATE);
+                startActivityForResult(intent, REQUEST_PICK_SIZE_DATE);
+                break;
+
+            case 6:
                 // Reset background image
                 SettingsHelper.get(this).setBackgroundPicture(null);
 
@@ -124,6 +140,15 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                 SettingsHelper.get(this).putFontTime(fontName);
                 break;
 
+            case REQUEST_PICK_SIZE_TIME:
+                if (resultCode == RESULT_CANCELED) {
+                    // The user pressed 'Cancel'
+                    break;
+                }
+                int size = data.getIntExtra(SizePickActivity.EXTRA_RESULT, -1);
+                SettingsHelper.get(this).putSizeTime(size);
+                break;
+
             case REQUEST_PICK_FONT_DATE:
                 if (resultCode == RESULT_CANCELED) {
                     // The user pressed 'Cancel'
@@ -131,6 +156,15 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                 }
                 fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
                 SettingsHelper.get(this).putFontDate(fontName);
+                break;
+
+            case REQUEST_PICK_SIZE_DATE:
+                if (resultCode == RESULT_CANCELED) {
+                    // The user pressed 'Cancel'
+                    break;
+                }
+                size = data.getIntExtra(SizePickActivity.EXTRA_RESULT, -1);
+                SettingsHelper.get(this).putSizeDate(size);
                 break;
         }
     }
