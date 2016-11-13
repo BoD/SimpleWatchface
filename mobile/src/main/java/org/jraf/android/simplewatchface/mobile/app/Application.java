@@ -7,7 +7,7 @@
  *                              /___/
  * repository.
  *
- * Copyright (C) 2015 Benoit 'BoD' Lubek (BoD@JRAF.org)
+ * Copyright (C) 2016 Benoit 'BoD' Lubek (BoD@JRAF.org)
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,18 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.jraf.android.simplewatchface.wear;
+package org.jraf.android.simplewatchface.mobile.app;
 
-public class Constants {
-    public static final String TAG = "SimpleWatchFace";
+import org.jraf.android.util.log.Log;
+
+public class Application extends android.app.Application {
+    private static final String TAG = "SimpleWatchFace";
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        // Log
+        Log.init(this, TAG);
+    }
 }

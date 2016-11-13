@@ -36,7 +36,7 @@ import android.support.annotation.Nullable;
 
 import org.jraf.android.util.bitmap.BitmapUtil;
 import org.jraf.android.util.listeners.Listeners;
-import org.jraf.android.util.log.wrapper.Log;
+import org.jraf.android.util.log.Log;
 
 public class SettingsHelper extends SettingsPrefs {
     private static SettingsHelper sInstance;

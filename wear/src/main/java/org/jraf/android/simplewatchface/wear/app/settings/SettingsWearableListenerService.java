@@ -38,11 +38,10 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 import org.jraf.android.simplewatchface.common.wear.WearHelper;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
+import org.jraf.android.util.log.Log;
 import org.jraf.android.util.log.LogUtil;
-import org.jraf.android.util.log.wrapper.Log;
 
 public class SettingsWearableListenerService extends WearableListenerService {
-    private static final int NOTIFICATION_ID = 0;
     private WearHelper mWearHelper = WearHelper.get();
 
     public SettingsWearableListenerService() {}

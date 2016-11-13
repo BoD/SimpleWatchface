@@ -50,7 +50,7 @@ import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
-import org.jraf.android.util.log.wrapper.Log;
+import org.jraf.android.util.log.Log;
 
 public class SimpleWatchFaceService extends CanvasWatchFaceService {
     /**

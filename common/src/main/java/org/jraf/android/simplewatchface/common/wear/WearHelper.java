@@ -35,9 +35,6 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.WorkerThread;
 
-import org.jraf.android.util.io.IoUtil;
-import org.jraf.android.util.log.wrapper.Log;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Asset;
@@ -46,6 +43,9 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
+
+import org.jraf.android.util.io.IoUtil;
+import org.jraf.android.util.log.Log;
 
 /**
  * Helper singleton class to deal with the wear APIs.<br/>

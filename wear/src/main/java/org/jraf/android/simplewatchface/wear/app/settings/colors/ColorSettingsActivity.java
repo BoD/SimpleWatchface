@@ -33,7 +33,7 @@ import org.jraf.android.androidwearcolorpicker.app.ColorPickActivity;
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.SettingsAdapter;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
-import org.jraf.android.util.log.wrapper.Log;
+import org.jraf.android.util.log.Log;
 
 public class ColorSettingsActivity extends Activity implements WearableListView.ClickListener {
     private static final int REQUEST_PICK_COLOR = 0;

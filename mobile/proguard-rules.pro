@@ -1,17 +1,13 @@
-# Add project specific ProGuard rules here.
-# By default, the flags in this file are appended to flags specified
-# in /Users/bod/Dev/android-sdk-macosx/tools/proguard/proguard-android.txt
-# You can edit the include path and order by changing the proguardFiles
-# directive in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Do not obfuscate
+-dontobfuscate
 
-# Add any project specific keep options here:
+# Resolves some obscure proguard/dex problem that breaks the build
+# (See http://stackoverflow.com/a/7587680/15695)
+-optimizations !code/allocation/variable
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Keep line numbers
+-renamesourcefileattribute SourceFile
+-keepattributes SourceFile,LineNumberTable
+
+# Support library
+-keep class android.support.v7.preference.** { *; }

@@ -41,14 +41,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.widget.Toast;
 
+import com.soundcloud.android.crop.Crop;
+
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.common.wear.WearHelper;
 import org.jraf.android.util.bitmap.BitmapUtil;
 import org.jraf.android.util.file.FileUtil;
 import org.jraf.android.util.io.IoUtil;
-import org.jraf.android.util.log.wrapper.Log;
-
-import com.soundcloud.android.crop.Crop;
+import org.jraf.android.util.log.Log;
 
 public class BackgroundSetActivity extends Activity {
     private static final String TAG = BackgroundSetActivity.class.getName();

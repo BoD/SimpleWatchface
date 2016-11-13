@@ -24,16 +24,16 @@
  */
 package org.jraf.android.simplewatchface.wear.app;
 
-import org.jraf.android.simplewatchface.wear.Constants;
-import org.jraf.android.util.log.wrapper.Log;
+import org.jraf.android.util.log.Log;
 
 public class Application extends android.app.Application {
+    private static final String TAG = "SimpleWatchFace";
+
     @Override
     public void onCreate() {
         super.onCreate();
 
         // Log
-        Log.init(Constants.TAG);
-        Log.setEnabled(true);
+        Log.init(this, TAG);
     }
 }
