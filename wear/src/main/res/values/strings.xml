@@ -10,9 +10,11 @@
     <string name="settings_colors_seconds">Seconds</string>
     <string name="settings_colors_amPm">AM/PM</string>
     <string name="settings_colors_date">Date</string>
-    <string name="settings_resetBackgroundImage_success">Background picture reset :)</string>
+    <string name="settings_resetBackgroundImage_success">Background picture reset</string>
     <string name="settings_font_time">Time font</string>
+    <string name="settings_size_time">Time size</string>
     <string name="settings_font_date">Date font</string>
+    <string name="settings_size_date">Date size</string>
 
     <string name="action_settings">Settings</string>
 

@@ -24,31 +24,33 @@
  */
 package org.jraf.android.simplewatchface.wear.app.settings.presets;
 
+import java.util.ArrayList;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Typeface;
-import android.graphics.drawable.BitmapDrawable;
 import android.support.v4.view.PagerAdapter;
-import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
-
-import java.util.ArrayList;
+import org.jraf.android.simplewatchface.wear.widget.WatchFaceView;
 
 public class PresetPagerAdapter extends PagerAdapter {
     private final Context mContext;
+    private final SettingsHelper mSettingsHelper;
     private ArrayList<ColorPreset> mColorPresetList = new ArrayList<>();
+    private boolean mIsRound;
 
     public PresetPagerAdapter(Context context) {
         mContext = context;
+        mSettingsHelper = SettingsHelper.get(context);
         try {
-            Bitmap backgroundPicture = SettingsHelper.get(context).getBackgroundPicture();
+            Bitmap backgroundPicture = mSettingsHelper.getBackgroundPicture();
             if (backgroundPicture != null) {
                 mColorPresetList.add(ColorPreset.fromImage(backgroundPicture));
             }
@@ -78,37 +80,33 @@ public class PresetPagerAdapter extends PagerAdapter {
 
     @Override
     public Object instantiateItem(ViewGroup container, int position) {
-        View res = LayoutInflater.from(mContext).inflate(R.layout.preset_pick_page, container, false);
-        View conBackground = res.findViewById(R.id.conBackground);
-        TextView txtHourMinutes = (TextView) res.findViewById(R.id.txtHourMinutes);
-        TextView txtSeconds = (TextView) res.findViewById(R.id.txtSeconds);
-        TextView txtAmPm = (TextView) res.findViewById(R.id.txtAmPm);
-        TextView txtDate = (TextView) res.findViewById(R.id.txtDate);
-
-        boolean is24HourFormat = DateFormat.is24HourFormat(mContext);
-        if (is24HourFormat) txtAmPm.setVisibility(View.INVISIBLE);
-
-        // Typefaces
-        Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontTime());
-        Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + SettingsHelper.get(mContext).getFontDate());
-        txtHourMinutes.setTypeface(timeTypeface);
-        txtSeconds.setTypeface(timeTypeface);
-        txtAmPm.setTypeface(timeTypeface);
-        txtDate.setTypeface(dateTypeface);
-
-        // Colors
         ColorPreset colorPreset = mColorPresetList.get(position);
+
+        View res = LayoutInflater.from(mContext).inflate(R.layout.settings_pick_page, container, false);
+
         // Background
-        Bitmap backgroundPicture = SettingsHelper.get(mContext).getBackgroundPicture();
+        ImageView conBackground = (ImageView) res.findViewById(R.id.imgBackground);
+        Bitmap backgroundPicture = mSettingsHelper.getBackgroundPicture();
         if (backgroundPicture != null) {
-            conBackground.setBackground(new BitmapDrawable(mContext.getResources(), backgroundPicture));
+            conBackground.setImageBitmap(backgroundPicture);
         } else {
             conBackground.setBackgroundColor(colorPreset.background);
         }
-        txtHourMinutes.setTextColor(colorPreset.hourMinutes);
-        txtSeconds.setTextColor(colorPreset.seconds);
-        txtAmPm.setTextColor(colorPreset.amPm);
-        txtDate.setTextColor(colorPreset.date);
+
+        WatchFaceView watchFaceView = (WatchFaceView) res.findViewById(R.id.vieWatchFace);
+        watchFaceView.setIsRound(mIsRound);
+
+        // Typefaces
+        Typeface timeTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontTime());
+        Typeface dateTypeface = Typeface.createFromAsset(mContext.getAssets(), "fonts/" + mSettingsHelper.getFontDate());
+        watchFaceView.setTimeTypeface(timeTypeface);
+        watchFaceView.setDateTypeface(dateTypeface);
+
+        // Colors
+        watchFaceView.setHourMinutesColor(colorPreset.hourMinutes);
+        watchFaceView.setSecondsColor(colorPreset.seconds);
+        watchFaceView.setAmPmColor(colorPreset.amPm);
+        watchFaceView.setDateColor(colorPreset.date);
 
         container.addView(res);
 
@@ -128,4 +126,9 @@ public class PresetPagerAdapter extends PagerAdapter {
     public ColorPreset getColorPreset(int index) {
         return mColorPresetList.get(index);
     }
+
+    public void setIsRound(boolean isRound) {
+        mIsRound = isRound;
+    }
+
 }

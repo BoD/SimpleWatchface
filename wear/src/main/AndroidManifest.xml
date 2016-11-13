@@ -53,8 +53,7 @@
 
         <!-- Main settings -->
         <activity
-            android:name=".wear.app.settings.main.MainSettingsActivity"
-            android:label="@string/app_name">
+            android:name=".wear.app.settings.main.MainSettingsActivity">
             <intent-filter>
                 <action android:name="org.jraf.android.simplewatchface.ACTION_SETTINGS" />
 
@@ -65,19 +64,19 @@
 
         <!-- Color settings -->
         <activity
-            android:name=".wear.app.settings.colors.ColorSettingsActivity"
-            android:label="@string/app_name" />
+            android:name=".wear.app.settings.colors.ColorSettingsActivity" />
 
-        <!-- Presets -->
+        <!-- Color presets -->
         <activity
-            android:name=".wear.app.settings.presets.PresetPickActivity"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.NoSwipeToDismiss" />
+            android:name=".wear.app.settings.presets.PresetPickActivity" />
 
         <!-- Fonts -->
         <activity
-            android:name=".wear.app.settings.fonts.FontPickActivity"
-            android:label="@string/app_name" />
+            android:name=".wear.app.settings.fonts.FontPickActivity" />
+
+        <!-- Sizes -->
+        <activity
+            android:name=".wear.app.settings.size.SizePickActivity" />
 
         <!-- Confirmation -->
         <activity

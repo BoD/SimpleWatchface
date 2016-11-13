@@ -23,17 +23,17 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<resources>
-    <color name="default_background">#024</color>
-    <color name="default_hourMinutes">#9EF</color>
-    <color name="default_seconds">#AFF</color>
-    <color name="default_date">#5DF</color>
-    <color name="default_amPm">#D9EF</color>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
 
-    <color name="background_ambient">#000</color>
-    <color name="time_ambient">#FFF</color>
-    <color name="amPm_ambient">#DDD</color>
-    <color name="date_ambient">#FFF</color>
-    <color name="settings_color_generic">#888</color>
+    <ProgressBar
+        android:id="@+id/progressBar"
+        style="?android:attr/progressBarStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
 
-</resources>
+</LinearLayout>

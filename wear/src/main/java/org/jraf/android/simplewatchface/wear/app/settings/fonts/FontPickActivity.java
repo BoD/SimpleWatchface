@@ -33,22 +33,23 @@ import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.view.WatchViewStub;
+import android.view.View;
+import android.view.WindowInsets;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
-import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 
+import butterknife.Bind;
 import butterknife.ButterKnife;
-import butterknife.InjectView;
 import butterknife.OnClick;
 
 public class FontPickActivity extends Activity {
-    public static enum Mode {TIME, DATE,}
+    public enum Mode {TIME, DATE,}
 
     public static final String EXTRA_MODE = "EXTRA_MODE";
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
-    @InjectView(R.id.vpgPresets)
+    @Bind(R.id.vpgSettings)
     protected ViewPager mVpgPresets;
 
     private Mode mMode = Mode.TIME;
@@ -57,16 +58,16 @@ public class FontPickActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.preset_pick);
+        setContentView(R.layout.settings_pick);
 
         mMode = (Mode) getIntent().getSerializableExtra(EXTRA_MODE);
+        mAdapter = new FontPagerAdapter(FontPickActivity.this, mMode);
 
         final WatchViewStub stub = (WatchViewStub) findViewById(R.id.viewStub);
         stub.setOnLayoutInflatedListener(new WatchViewStub.OnLayoutInflatedListener() {
             @Override
             public void onLayoutInflated(WatchViewStub stub) {
-                ButterKnife.inject(FontPickActivity.this, stub);
-                mAdapter = new FontPagerAdapter(FontPickActivity.this, mMode);
+                ButterKnife.bind(FontPickActivity.this, stub);
                 mVpgPresets.setAdapter(mAdapter);
                 mVpgPresets.setPageTransformer(true, new ZoomOutPageTransformer());
                 mVpgPresets.setPageMargin(0);
@@ -90,9 +91,18 @@ public class FontPickActivity extends Activity {
                     }
                 });
                 revealAnimator.setDuration(200);
-                revealAnimator.setStartDelay(500);
+                revealAnimator.setStartDelay(1000);
                 revealAnimator.start();
 
+            }
+        });
+
+        stub.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+            @Override
+            public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                mAdapter.setIsRound(insets.isRound());
+                stub.onApplyWindowInsets(insets);
+                return insets;
             }
         });
     }
@@ -114,6 +124,7 @@ public class FontPickActivity extends Activity {
         showConfirmAnimation();
 
         finish();
+        overridePendingTransition(0, 0);
     }
 
     private void showConfirmAnimation() {

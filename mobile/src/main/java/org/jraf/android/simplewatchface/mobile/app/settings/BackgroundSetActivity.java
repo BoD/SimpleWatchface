@@ -24,31 +24,44 @@
  */
 package org.jraf.android.simplewatchface.mobile.app.settings;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.widget.Toast;
-
-import com.soundcloud.android.crop.Crop;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.common.wear.WearHelper;
 import org.jraf.android.util.bitmap.BitmapUtil;
 import org.jraf.android.util.file.FileUtil;
+import org.jraf.android.util.io.IoUtil;
+import org.jraf.android.util.log.wrapper.Log;
 
-import java.io.File;
+import com.soundcloud.android.crop.Crop;
 
 public class BackgroundSetActivity extends Activity {
+    private static final String TAG = BackgroundSetActivity.class.getName();
+
     private Uri mOutputUri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Uri imageUri = (Uri) getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
+        setContentView(R.layout.background_set);
+
+        final Uri imageUri = (Uri) getIntent().getParcelableExtra(Intent.EXTRA_STREAM);
         if (imageUri == null) {
             // Should never happen, but avoid crashing
             finish();
@@ -57,13 +70,74 @@ public class BackgroundSetActivity extends Activity {
 
         if (savedInstanceState != null) {
             mOutputUri = (Uri) savedInstanceState.getSerializable("mOutputUri");
+        } else {
+            new AsyncTask<Void, Void, Throwable>() {
+                private File mTempFile;
+
+                @Override
+                protected Throwable doInBackground(Void... params) {
+                    // Download the uri into a temporary file
+                    mTempFile = FileUtil.newTemporaryFile(BackgroundSetActivity.this, ".jpg");
+                    try {
+                        InputStream in = getContentResolver().openInputStream(imageUri);
+                        OutputStream out = new FileOutputStream(mTempFile);
+                        IoUtil.copy(in, out);
+                        IoUtil.closeSilently(in, out);
+                    } catch (IOException e) {
+                        return e;
+                    }
+
+                    // Does it need rotating?
+                    int rotation = BitmapUtil.getExifRotation(mTempFile);
+                    if (rotation != 0) {
+                        // Rotation needed
+                        // Load the file into a bitmap. XXX This may consume a lot of memory :(
+                        Bitmap originalBitmap = BitmapUtil.tryDecodeFile(mTempFile, null);
+                        if (originalBitmap == null) return new Exception("Could not decode the file");
+
+                        Matrix matrix = new Matrix();
+                        matrix.postRotate(rotation);
+                        Bitmap rotatedBitmap = null;
+                        try {
+                            // Create a new rotated bitmap from the original one. XXX This may consume a lot of memory :(
+                            rotatedBitmap = Bitmap.createBitmap(originalBitmap, 0, 0, originalBitmap.getWidth(), originalBitmap.getHeight(), matrix, false);
+                            originalBitmap.recycle();
+                        } catch (OutOfMemoryError e) {
+                            return e;
+                        }
+
+                        // Save the rotated bitmap to the file
+                        OutputStream out = null;
+                        try {
+                            out = new FileOutputStream(mTempFile);
+                        } catch (FileNotFoundException e) {
+                            return e;
+                        }
+                        rotatedBitmap.compress(Bitmap.CompressFormat.JPEG, 90, out);
+                        IoUtil.closeSilently(out);
+                    }
+
+                    return null;
+                }
+
+                @Override
+                protected void onPostExecute(Throwable throwable) {
+                    if (throwable != null) {
+                        Log.w("Could not read or rotate the image", throwable);
+                        Toast.makeText(BackgroundSetActivity.this, R.string.background_set_fail_cannotDecodeBitmap, Toast.LENGTH_LONG).show();
+                        finish();
+                        return;
+                    }
+
+                    mOutputUri = getTempFile();
+                    new Crop(Uri.fromFile(mTempFile)).output(mOutputUri).asSquare().start(BackgroundSetActivity.this);
+                }
+            }.execute();
         }
-        mOutputUri = getTempFile();
-        new Crop(imageUri).output(mOutputUri).asSquare().start(this);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle outState) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
         outState.putParcelable("mOutputUri", mOutputUri);
         super.onSaveInstanceState(outState);
     }

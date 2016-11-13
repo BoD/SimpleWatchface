@@ -24,11 +24,19 @@
  */
 package org.jraf.android.simplewatchface.common.wear;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.annotation.WorkerThread;
+
+import org.jraf.android.util.io.IoUtil;
+import org.jraf.android.util.log.wrapper.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -38,14 +46,6 @@ import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.PutDataMapRequest;
 import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
-
-import org.jraf.android.util.annotation.Background;
-import org.jraf.android.util.io.IoUtil;
-import org.jraf.android.util.log.wrapper.Log;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 /**
  * Helper singleton class to deal with the wear APIs.<br/>
@@ -70,7 +70,7 @@ public class WearHelper {
         return INSTANCE;
     }
 
-    @Background(Background.Type.NETWORK)
+    @WorkerThread
     public synchronized void connect(Context context) {
         Log.d();
         if (mGoogleApiClient != null) {
@@ -93,7 +93,7 @@ public class WearHelper {
         mGoogleApiClient = null;
     }
 
-    @Background(Background.Type.NETWORK)
+    @WorkerThread
     public void putSettings(@NonNull Bitmap backgroundPicture) {
         Log.d();
         // Create new value
@@ -106,7 +106,7 @@ public class WearHelper {
         Wearable.DataApi.putDataItem(mGoogleApiClient, request).await();
     }
 
-    @Background(Background.Type.NETWORK)
+    @WorkerThread
     public void removeSettings() {
         Log.d();
         Wearable.DataApi.deleteDataItems(mGoogleApiClient, createUri(PATH_SETTINGS)).await();
@@ -130,14 +130,14 @@ public class WearHelper {
         return Asset.createFromBytes(byteStream.toByteArray());
     }
 
-    @Background(Background.Type.NETWORK)
+    @WorkerThread
     public Bitmap loadBitmapFromAsset(Asset asset) {
         DataApi.GetFdForAssetResult fd = Wearable.DataApi.getFdForAsset(mGoogleApiClient, asset).await();
         InputStream inputStream = fd.getInputStream();
         return BitmapFactory.decodeStream(inputStream);
     }
 
-    @Background(Background.Type.NETWORK)
+    @WorkerThread
     public byte[] loadDataFromAsset(Asset asset) {
         DataApi.GetFdForAssetResult fd = Wearable.DataApi.getFdForAsset(mGoogleApiClient, asset).await();
         InputStream inputStream = fd.getInputStream();

@@ -22,35 +22,11 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<android.support.wearable.view.WatchViewStub
+    android:id="@+id/viewStub"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="org.jraf.android.simplewatchface.wear.app.settings.presets.PresetPickActivity">
-
-    <ImageButton
-        android:id="@+id/btnOk"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_check"
-        android:tint="#8F8" />
-
-    <android.support.v4.view.ViewPager
-        android:id="@+id/vpgPresets"
-        android:layout_width="match_parent"
-        android:layout_height="0px"
-        android:layout_weight="1" />
-
-
-    <ImageButton
-        android:id="@+id/btnCancel"
-        style="?android:attr/borderlessButtonStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:src="@drawable/ic_close"
-        android:tint="#F88" />
-
-
-</LinearLayout>
+    app:rectLayout="@layout/settings_pick_rect"
+    app:roundLayout="@layout/settings_pick_round" />

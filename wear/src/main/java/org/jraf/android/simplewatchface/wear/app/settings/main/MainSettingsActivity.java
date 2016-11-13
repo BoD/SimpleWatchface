@@ -27,22 +27,24 @@ package org.jraf.android.simplewatchface.wear.app.settings.main;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.wearable.activity.ConfirmationActivity;
 import android.support.wearable.view.WearableListView;
-import android.widget.Toast;
 
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.SettingsAdapter;
 import org.jraf.android.simplewatchface.wear.app.settings.colors.ColorSettingsActivity;
 import org.jraf.android.simplewatchface.wear.app.settings.fonts.FontPickActivity;
 import org.jraf.android.simplewatchface.wear.app.settings.presets.PresetPickActivity;
+import org.jraf.android.simplewatchface.wear.app.settings.size.SizePickActivity;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 import org.jraf.android.simplewatchface.wear.settings.SettingsHelper;
 
 public class MainSettingsActivity extends Activity implements WearableListView.ClickListener {
     private static final int REQUEST_PICK_PRESET = 0;
     private static final int REQUEST_PICK_FONT_TIME = 1;
-    private static final int REQUEST_PICK_FONT_DATE = 2;
-
+    private static final int REQUEST_PICK_SIZE_TIME = 2;
+    private static final int REQUEST_PICK_FONT_DATE = 3;
+    private static final int REQUEST_PICK_SIZE_DATE = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,16 +82,35 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                 break;
 
             case 3:
+                // Time size
+                intent = new Intent(this, SizePickActivity.class);
+                intent.putExtra(SizePickActivity.EXTRA_MODE, SizePickActivity.Mode.TIME);
+                startActivityForResult(intent, REQUEST_PICK_SIZE_TIME);
+                break;
+
+            case 4:
                 // Date font
                 intent = new Intent(this, FontPickActivity.class);
                 intent.putExtra(FontPickActivity.EXTRA_MODE, FontPickActivity.Mode.DATE);
                 startActivityForResult(intent, REQUEST_PICK_FONT_DATE);
                 break;
 
-            case 4:
+            case 5:
+                // Date size
+                intent = new Intent(this, SizePickActivity.class);
+                intent.putExtra(SizePickActivity.EXTRA_MODE, SizePickActivity.Mode.DATE);
+                startActivityForResult(intent, REQUEST_PICK_SIZE_DATE);
+                break;
+
+            case 6:
                 // Reset background image
                 SettingsHelper.get(this).setBackgroundPicture(null);
-                Toast.makeText(this, R.string.settings_resetBackgroundImage_success, Toast.LENGTH_SHORT).show();
+
+                intent = new Intent(this, ConfirmationActivity.class);
+                intent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION);
+                intent.putExtra(ConfirmationActivity.EXTRA_MESSAGE, getString(R.string.settings_resetBackgroundImage_success));
+                startActivity(intent);
+
                 break;
         }
     }
@@ -116,7 +137,16 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                     break;
                 }
                 String fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
-                SettingsHelper.get(this).setFontTime(fontName);
+                SettingsHelper.get(this).putFontTime(fontName);
+                break;
+
+            case REQUEST_PICK_SIZE_TIME:
+                if (resultCode == RESULT_CANCELED) {
+                    // The user pressed 'Cancel'
+                    break;
+                }
+                int size = data.getIntExtra(SizePickActivity.EXTRA_RESULT, -1);
+                SettingsHelper.get(this).putSizeTime(size);
                 break;
 
             case REQUEST_PICK_FONT_DATE:
@@ -125,17 +155,26 @@ public class MainSettingsActivity extends Activity implements WearableListView.C
                     break;
                 }
                 fontName = data.getStringExtra(FontPickActivity.EXTRA_RESULT);
-                SettingsHelper.get(this).setFontDate(fontName);
+                SettingsHelper.get(this).putFontDate(fontName);
+                break;
+
+            case REQUEST_PICK_SIZE_DATE:
+                if (resultCode == RESULT_CANCELED) {
+                    // The user pressed 'Cancel'
+                    break;
+                }
+                size = data.getIntExtra(SizePickActivity.EXTRA_RESULT, -1);
+                SettingsHelper.get(this).putSizeDate(size);
                 break;
         }
     }
 
     private void saveColorPresetToPreferences(ColorPreset colorPreset) {
         SettingsHelper settingsHelper = SettingsHelper.get(this);
-        settingsHelper.setColorBackground(colorPreset.background);
-        settingsHelper.setColorHourMinutes(colorPreset.hourMinutes);
-        settingsHelper.setColorSeconds(colorPreset.seconds);
-        settingsHelper.setColorAmPm(colorPreset.amPm);
-        settingsHelper.setColorDate(colorPreset.date);
+        settingsHelper.putColorBackground(colorPreset.background);
+        settingsHelper.putColorHourMinutes(colorPreset.hourMinutes);
+        settingsHelper.putColorSeconds(colorPreset.seconds);
+        settingsHelper.putColorAmPm(colorPreset.amPm);
+        settingsHelper.putColorDate(colorPreset.date);
     }
 }

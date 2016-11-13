@@ -24,137 +24,47 @@
  */
 package org.jraf.android.simplewatchface.wear.settings;
 
-import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
-
-import org.jraf.android.simplewatchface.R;
-import org.jraf.android.util.bitmap.BitmapUtil;
-import org.jraf.android.util.listeners.Listeners;
-import org.jraf.android.util.log.wrapper.Log;
-
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class SettingsHelper {
-    private static final String PREF_COLOR_BACKGROUND = "PREF_COLOR_BACKGROUND";
-    private static final String PREF_COLOR_HOUR_MINUTES = "PREF_COLOR_HOUR_MINUTES";
-    private static final String PREF_COLOR_SECONDS = "PREF_COLOR_SECONDS";
-    private static final String PREF_COLOR_AM_PM = "PREF_COLOR_AM_PM";
-    private static final String PREF_COLOR_DATE = "PREF_COLOR_DATE";
-    private static final String PREF_FONT_TIME = "PREF_FONT_TIME";
-    private static final String PREF_FONT_DATE = "PREF_FONT_DATE";
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.annotation.Nullable;
 
-    private static final SettingsHelper INSTANCE = new SettingsHelper();
+import org.jraf.android.util.bitmap.BitmapUtil;
+import org.jraf.android.util.listeners.Listeners;
+import org.jraf.android.util.log.wrapper.Log;
+
+public class SettingsHelper extends SettingsPrefs {
+    private static SettingsHelper sInstance;
     private static final String FILE_BACKGROUND_PICTURE = "background.jpg";
 
-    private boolean mIsInit;
     private Context mContext;
-    private SharedPreferences mSharedPreference;
-
-    private int mDefaultColorBackground;
-    private int mDefaultColorHourMinutes;
-    private int mDefaultColorSeconds;
-    private int mDefaultColorAmPm;
-    private int mDefaultColorDate;
-    private String mDefaultFontTime;
-    private String mDefaultFontDate;
-
     private Bitmap mBackgroundPicture;
 
-    private SettingsHelper() {}
+    private SettingsHelper(SharedPreferences wrapped) {
+        super(wrapped);
+    }
 
     public static SettingsHelper get(Context context) {
-        if (!INSTANCE.mIsInit) {
-            INSTANCE.init(context);
+        if (sInstance == null) {
+            sInstance = new SettingsHelper(getWrapped(context));
+            sInstance.init(context);
         }
-        return INSTANCE;
+        return sInstance;
     }
 
     private void init(Context context) {
         mContext = context.getApplicationContext();
-        mSharedPreference = PreferenceManager.getDefaultSharedPreferences(context);
-        initDefaults(context);
         File backgroundBitmapFile = context.getFileStreamPath(FILE_BACKGROUND_PICTURE);
         if (backgroundBitmapFile.exists()) {
             mBackgroundPicture = BitmapUtil.tryDecodeFile(backgroundBitmapFile, null);
             if (mBackgroundPicture == null) Log.w("Could not open background bitmap");
         }
-        mIsInit = true;
     }
-
-    private void initDefaults(Context context) {
-        Resources resources = context.getResources();
-        mDefaultColorBackground = resources.getColor(R.color.default_background);
-        mDefaultColorHourMinutes = resources.getColor(R.color.default_hourMinutes);
-        mDefaultColorSeconds = resources.getColor(R.color.default_seconds);
-        mDefaultColorAmPm = resources.getColor(R.color.default_amPm);
-        mDefaultColorDate = resources.getColor(R.color.default_date);
-        mDefaultFontTime=resources.getString(R.string.default_font_time);
-        mDefaultFontDate = resources.getString(R.string.default_font_date);
-    }
-
-    public int getColorBackground() {
-        return mSharedPreference.getInt(PREF_COLOR_BACKGROUND, mDefaultColorBackground);
-    }
-
-    public void setColorBackground(int color) {
-        mSharedPreference.edit().putInt(PREF_COLOR_BACKGROUND, color).apply();
-    }
-
-    public int getColorHourMinutes() {
-        return mSharedPreference.getInt(PREF_COLOR_HOUR_MINUTES, mDefaultColorHourMinutes);
-    }
-
-    public void setColorHourMinutes(int color) {
-        mSharedPreference.edit().putInt(PREF_COLOR_HOUR_MINUTES, color).apply();
-    }
-
-    public int getColorSeconds() {
-        return mSharedPreference.getInt(PREF_COLOR_SECONDS, mDefaultColorSeconds);
-    }
-
-    public void setColorSeconds(int color) {
-        mSharedPreference.edit().putInt(PREF_COLOR_SECONDS, color).apply();
-    }
-
-    public int getColorAmPm() {
-        return mSharedPreference.getInt(PREF_COLOR_AM_PM, mDefaultColorAmPm);
-    }
-
-    public void setColorAmPm(int color) {
-        mSharedPreference.edit().putInt(PREF_COLOR_AM_PM, color).apply();
-    }
-
-    public int getColorDate() {
-        return mSharedPreference.getInt(PREF_COLOR_DATE, mDefaultColorDate);
-    }
-
-    public void setColorDate(int color) {
-        mSharedPreference.edit().putInt(PREF_COLOR_DATE, color).apply();
-    }
-
-    public String getFontTime() {
-        return mSharedPreference.getString(PREF_FONT_TIME, mDefaultFontTime);
-    }
-
-    public void setFontTime(String fontName) {
-        mSharedPreference.edit().putString(PREF_FONT_TIME, fontName).apply();
-    }
-
-    public String getFontDate() {
-        return mSharedPreference.getString(PREF_FONT_DATE, mDefaultFontDate);
-    }
-
-    public void setFontDate(String fontName) {
-        mSharedPreference.edit().putString(PREF_FONT_DATE, fontName).apply();
-    }
-
 
     public Bitmap getBackgroundPicture() {
         return mBackgroundPicture;
@@ -189,12 +99,12 @@ public class SettingsHelper {
     private Listeners<SettingsChangeListener> mListeners = new Listeners<SettingsChangeListener>() {
         @Override
         protected void onFirstListener() {
-            mSharedPreference.registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+            registerOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
         }
 
         @Override
         protected void onNoMoreListeners() {
-            mSharedPreference.unregisterOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
+            unregisterOnSharedPreferenceChangeListener(mOnSharedPreferenceChangeListener);
         }
     };
 

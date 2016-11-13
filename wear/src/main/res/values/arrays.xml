@@ -27,7 +27,9 @@
         <item>@string/settings_colorPresets</item>
         <item>@string/settings_colors</item>
         <item>@string/settings_font_time</item>
+        <item>@string/settings_size_time</item>
         <item>@string/settings_font_date</item>
+        <item>@string/settings_size_date</item>
         <item>@string/settings_resetBackgroundImage</item>
     </string-array>
 
