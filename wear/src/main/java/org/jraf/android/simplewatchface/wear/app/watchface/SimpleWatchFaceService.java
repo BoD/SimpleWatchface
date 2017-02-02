@@ -27,8 +27,12 @@ package org.jraf.android.simplewatchface.wear.app.watchface;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
+import java.util.TimeZone;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -313,6 +317,16 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             super.onVisibilityChanged(visible);
             Log.d("visible=" + visible);
 
+            // Time zone
+            if (visible) {
+                registerTimeZoneReceiver();
+                // Update time zone now in case it changed while we weren't visible
+                mNowCalendar.setTimeZone(TimeZone.getDefault());
+                invalidate();
+            } else {
+                unregisterReceiver();
+            }
+
             // Whether the timer should be running depends on whether we're visible (as well as
             // whether we're in ambient mode), so we may need to start or stop the timer.
             updateTimer();
@@ -445,8 +459,41 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
                     mAmPmPaint, mIsRound, mMarginBorders, mMarginDate, mMarginSeconds);
         }
 
-
         //endregion
+
+
+        //--------------------------------------------------------------------------
+        // region Time zone.
+        //--------------------------------------------------------------------------
+
+        private boolean mRegisteredTimeZoneReceiver;
+
+        private final BroadcastReceiver mTimeZoneReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                mNowCalendar.setTimeZone(TimeZone.getDefault());
+                invalidate();
+            }
+        };
+
+        private void registerTimeZoneReceiver() {
+            if (mRegisteredTimeZoneReceiver) {
+                return;
+            }
+            mRegisteredTimeZoneReceiver = true;
+            IntentFilter filter = new IntentFilter(Intent.ACTION_TIMEZONE_CHANGED);
+            SimpleWatchFaceService.this.registerReceiver(mTimeZoneReceiver, filter);
+        }
+
+        private void unregisterReceiver() {
+            if (!mRegisteredTimeZoneReceiver) {
+                return;
+            }
+            mRegisteredTimeZoneReceiver = false;
+            SimpleWatchFaceService.this.unregisterReceiver(mTimeZoneReceiver);
+        }
+
+        // endregion
     }
 
     private static int getTopForWidth(int diameter, int width) {
