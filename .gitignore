@@ -7,13 +7,9 @@ etc/apk
 
 .DS_Store
 .gradle
-.idea
 build
 etc/proguard/*
 
-common/build
 handheld/build
 wearable/build
-/.idea/workspace.xml
-/.idea/libraries
 *.iml

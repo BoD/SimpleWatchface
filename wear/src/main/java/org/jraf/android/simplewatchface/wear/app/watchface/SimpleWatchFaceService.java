@@ -25,7 +25,7 @@
 package org.jraf.android.simplewatchface.wear.app.watchface;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.Calendar;
 import java.util.Locale;
 
 import android.content.Context;
@@ -42,7 +42,6 @@ import android.os.Message;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.text.format.DateFormat;
-import android.text.format.Time;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
@@ -100,7 +99,7 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         private Paint mAmPmPaint;
         private Paint mDatePaint;
 
-        private Time mTime = new Time();
+        private Calendar mNowCalendar = Calendar.getInstance();
         private boolean mIs24HourFormat;
         private SimpleDateFormat mDateFormat;
 
@@ -354,41 +353,44 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
             super.onDestroy();
         }
 
-        /*
-         * Time / date formatting.
-         */
-        // region
+
+        //--------------------------------------------------------------------------
+        // region Time / date formatting.
+        //--------------------------------------------------------------------------
 
         private String getHourMinutes() {
-            int hour = mTime.hour;
+            int hour = mNowCalendar.get(Calendar.HOUR_OF_DAY);
             if (!mIs24HourFormat) hour = hour % 12;
             StringBuilder res = new StringBuilder(String.valueOf(hour));
             res.append(':');
-            if (mTime.minute < 10) res.append('0');
-            res.append(String.valueOf(mTime.minute));
+            int minute = mNowCalendar.get(Calendar.MINUTE);
+            if (minute < 10) res.append('0');
+            res.append(String.valueOf(minute));
             return res.toString();
         }
 
         private String getSeconds() {
             StringBuilder res = new StringBuilder();
-            if (mTime.second < 10) res.append('0');
-            res.append(String.valueOf(mTime.second));
+            int second = mNowCalendar.get(Calendar.SECOND);
+            if (second < 10) res.append('0');
+            res.append(String.valueOf(second));
             return res.toString();
         }
 
         private String getAmPm() {
-            if (mTime.hour <= 11) return "AM";
+            if (mNowCalendar.get(Calendar.HOUR_OF_DAY) <= 11) return "AM";
             return "PM";
         }
 
         private String getDate() {
             if (mDateFormat == null) {
-                mDateFormat = new SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "dEEEMMM"));
+                mDateFormat = new SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "dEEEMMM"), Locale.getDefault());
             }
-            if (mCachedDateDay != mTime.monthDay) {
+            int dayOfMonth = mNowCalendar.get(Calendar.DAY_OF_MONTH);
+            if (mCachedDateDay != dayOfMonth) {
                 // New day: format the date
-                mCachedDateStr = mDateFormat.format(new Date());
-                mCachedDateDay = mTime.monthDay;
+                mCachedDateStr = mDateFormat.format(mNowCalendar.getTimeInMillis());
+                mCachedDateDay = dayOfMonth;
             }
             return mCachedDateStr;
         }
@@ -396,15 +398,14 @@ public class SimpleWatchFaceService extends CanvasWatchFaceService {
         // endregion
 
 
-        /*
-         * Actual drawing happens here!
-         */
-        // region
+        //--------------------------------------------------------------------------
+        // region Actual drawing happens here!
+        //--------------------------------------------------------------------------
 
         @Override
         public void onDraw(Canvas canvas, Rect bounds) {
             Log.d();
-            mTime.setToNow();
+            mNowCalendar.setTimeInMillis(System.currentTimeMillis());
 
             if (isInAmbientMode()) {
                 // Background

@@ -1,0 +1,15 @@
+.name
+codeStyleSettings.xml
+compiler.xml
+encodings.xml
+findbugs-idea.xml
+gradle.xml
+misc.xml
+modules.xml
+runConfigurations.xml
+vcs.xml
+workspace.xml
+scopes
+libraries
+inspectionProfiles
+dictionaries
