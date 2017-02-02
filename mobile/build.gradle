@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
+if (buildProperties.enableFabric.toBoolean()) apply plugin: 'io.fabric'
 
 android {
     compileSdkVersion versions.compileSdk
@@ -55,6 +55,12 @@ android {
 
     dataBinding {
         enabled = true
+    }
+
+    lintOptions {
+        abortOnError true
+        textReport true
+        ignoreWarnings true
     }
 }
 
