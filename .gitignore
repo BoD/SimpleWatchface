@@ -4,12 +4,13 @@ build.properties
 build.number
 local.properties
 etc/apk
-
 .DS_Store
 .gradle
 build
 etc/proguard/*
-
 handheld/build
 wearable/build
 *.iml
+.idea/.name
+.idea/gragle.xml
+.idea/misc.xml
