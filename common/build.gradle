@@ -1,11 +1,12 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion versions.compileSdk
     buildToolsVersion versions.buildTools
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion versions.targetSdk
         versionCode buildNumber
         versionName buildProperties.versionName
@@ -21,6 +22,6 @@ android {
 }
 
 dependencies {
-    compile "com.google.android.gms:play-services-wearable:$versions.playServices"
-    compile 'com.github.BoD:jraf-android-util:-SNAPSHOT'
+    api "com.google.android.gms:play-services-wearable:$versions.playServices"
+    api 'com.github.BoD:jraf-android-util:-SNAPSHOT'
 }

@@ -130,7 +130,7 @@ public class BackgroundSetActivity extends Activity {
                     }
 
                     mOutputUri = getTempFile();
-                    new Crop(Uri.fromFile(mTempFile)).output(mOutputUri).asSquare().start(BackgroundSetActivity.this);
+                    Crop.of(Uri.fromFile(mTempFile), mOutputUri).asSquare().start(BackgroundSetActivity.this);
                 }
             }.execute();
         }

@@ -36,12 +36,12 @@ import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.view.WindowInsets;
 
-import org.jraf.android.simplewatchface.R;
-import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
-
-import butterknife.Bind;
+import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+
+import org.jraf.android.simplewatchface.R;
+import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
 
 public class SizePickActivity extends Activity {
     public enum Mode {TIME, DATE,}
@@ -49,7 +49,7 @@ public class SizePickActivity extends Activity {
     public static final String EXTRA_MODE = "EXTRA_MODE";
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
-    @Bind(R.id.vpgSettings)
+    @BindView(R.id.vpgSettings)
     protected ViewPager mVpgSettings;
 
     private Mode mMode = Mode.TIME;

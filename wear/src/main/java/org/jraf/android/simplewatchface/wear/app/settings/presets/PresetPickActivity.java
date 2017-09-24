@@ -36,18 +36,18 @@ import android.support.wearable.view.WatchViewStub;
 import android.view.View;
 import android.view.WindowInsets;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+
 import org.jraf.android.simplewatchface.R;
 import org.jraf.android.simplewatchface.wear.app.settings.ZoomOutPageTransformer;
 import org.jraf.android.simplewatchface.wear.presets.ColorPreset;
 
-import butterknife.Bind;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
-
 public class PresetPickActivity extends Activity {
     public static final String EXTRA_RESULT = "EXTRA_RESULT";
 
-    @Bind(R.id.vpgSettings)
+    @BindView(R.id.vpgSettings)
     protected ViewPager mVpgPresets;
 
     private PresetPagerAdapter mAdapter;
